@@ -1,15 +1,13 @@
 import * as React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import logo from "../assets/logo.png";
+import { useNavigate, useLocation } from "react-router-dom";
 
-// Callback functions for the parent component in root.tsx
-// Which are handled with the handle functions in root.tsx
-interface FinishProps {
-  onPlayAgain: () => void;
-  onChangeCategory: () => void;
-}
+const Finish: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { correctResponses, category, boardsCleared } = location.state;
 
-const Finish: React.FC<FinishProps> = ({ onPlayAgain, onChangeCategory }) => {
   return (
     <Box
       display="flex"
@@ -24,8 +22,8 @@ const Finish: React.FC<FinishProps> = ({ onPlayAgain, onChangeCategory }) => {
         style={{ width: "150px", marginBottom: "20px" }}
       />
       <Typography variant="h4" gutterBottom>
-        Congratulations! You earned X points by giving Y correct responses and
-        clearing Z boards.
+        Congratulations! You earned {correctResponses * 10} points by giving {correctResponses} correct responses and
+        clearing {boardsCleared} {boardsCleared === 1 ? "board" : "boards"}!
       </Typography>
       <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
         <Button
@@ -38,7 +36,7 @@ const Finish: React.FC<FinishProps> = ({ onPlayAgain, onChangeCategory }) => {
             textTransform: "none",
             marginBottom: 4,
           }}
-          onClick={onPlayAgain}
+          onClick={() => navigate("/category", { replace: true, state: { category } })}
         >
           Play Again
         </Button>
@@ -51,9 +49,9 @@ const Finish: React.FC<FinishProps> = ({ onPlayAgain, onChangeCategory }) => {
             fontWeight: "bold",
             textTransform: "none",
           }}
-          onClick={onChangeCategory}
+          onClick={() => navigate("/", { replace: true })}
         >
-          Change Category?
+          Change Category
         </Button>
       </Box>
     </Box>
