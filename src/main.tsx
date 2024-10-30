@@ -3,27 +3,25 @@ import * as ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import Root from "./routes/root";
-import ErrorPage from "./error-page";
 import Category from "./routes/category";
 import Finish from "./routes/finish";
+import ErrorPage from "./error-page";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
     errorElement: <ErrorPage />,
-    children: [
-      {
-        index: true,
-        element: <Category />,
-        errorElement: <ErrorPage />,
-      },
-      {
-        path: "finish",
-        element: <Finish />,
-        errorElement: <ErrorPage />,
-      },
-    ],
+  },
+  {
+    path: "category",
+    element: <Category />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "finish",
+    element: <Finish />,
+    errorElement: <ErrorPage />,
   },
 ]);
 
