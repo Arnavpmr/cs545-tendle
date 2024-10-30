@@ -1,4 +1,4 @@
-[
+export default [
   {
     "question": "Question 1 for General Knowledge?",
     "answerList": [
