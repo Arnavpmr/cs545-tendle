@@ -102,9 +102,10 @@ const Category: React.FC<CategoryProps> = ({ onFinish }) => {
                 sx={{
                   fontSize: "1.5em",
                   color: "black",
+                  textAlign: "left",
                 }}
               >
-                {index + 1}
+                {index + 1}&#46;
               </Item>
             </Grid>
           ))}
