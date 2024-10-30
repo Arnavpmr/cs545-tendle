@@ -1,17 +1,16 @@
 import fs from 'fs';
-
-const categories = ['General Knowledge', 'Music', 'Movies', 'Geography'];
+import * as constants from '../src/constants';
 
 const topTenList = [];
 
-for (let i = 0; i < categories.length; i++) {
-    for (let j = 0; j < 10; j++) {
+for (let i = 0; i < constants.CATEGORIES.length; i++) {
+    for (let j = 0; j < constants.LIST_LENGTH; j++) {
         topTenList.push({
-            question: `Question ${j + 1} for ${categories[i]}?`,
+            question: `Question ${j + 1} for ${constants.CATEGORIES[i]}?`,
             answerList: [...Array(10)].map((_, index) => `Answer ${index + 1}`),
-            category: categories[i],
+            category: constants.CATEGORIES[i],
         });
     }
 }
 
-fs.writeFileSync('topTenLists.json', JSON.stringify(topTenList, null, 2));
+fs.writeFileSync('topTenLists.ts', 'export default ' + JSON.stringify(topTenList, null, 2));
