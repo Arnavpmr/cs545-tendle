@@ -1,21 +1,24 @@
 import * as React from "react";
-import {
-  Box,
-  Button,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  TextField,
-} from "@mui/material";
+import { Box, Button, Paper, Typography, TextField } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import logo from "../assets/logo.png";
 import heart from "../assets/heart.png";
+import { styled } from "@mui/material/styles";
 
 interface CategoryProps {
   onFinish: () => void;
 }
+
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: "#fff",
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: "center",
+  color: theme.palette.text.secondary,
+  ...theme.applyStyles("dark", {
+    backgroundColor: "#1A2027",
+  }),
+}));
 
 const Category: React.FC<CategoryProps> = ({ onFinish }) => {
   const handleCheckAnswer = () => {
@@ -86,21 +89,27 @@ const Category: React.FC<CategoryProps> = ({ onFinish }) => {
       >
         Check
       </Button>
-      <TableContainer sx={{ backgroundColor: "black", marginBottom: 2 }}>
-        <Table>
-          <TableBody>
-            {[...Array(5)].map((_, rowIndex) => (
-              <TableRow key={rowIndex}>
-                {[...Array(2)].map((_, colIndex) => (
-                  <TableCell key={colIndex} sx={{ color: "white" }}>
-                    {rowIndex * 2 + colIndex + 1}.
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+
+      <Box sx={{ flexGrow: 1 }}>
+        <Grid
+          container
+          spacing={{ xs: 2, md: 3 }}
+          columns={{ xs: 4, sm: 8}}
+        >
+          {Array.from(Array(10)).map((_, index) => (
+            <Grid key={index} size={{ xs: 2, sm: 4, md: 4 }}>
+              <Item
+                sx={{
+                  fontSize: "1.5em",
+                  color: "black",
+                }}
+              >
+                {index + 1}
+              </Item>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     </Box>
   );
 };
