@@ -53,7 +53,7 @@ const Finish: React.FC<FinishProps> = ({ onPlayAgain, onChangeCategory }) => {
           }}
           onClick={onChangeCategory}
         >
-          Change Category?
+          Change Category
         </Button>
       </Box>
     </Box>
