@@ -61,18 +61,22 @@ const Category: React.FC = () => {
         setStreak(streak + 1);
 
         if (!newAnswers.includes(false) && topTenListIndex !== undefined) {
+          if (boardsCleared >= constants.LISTS_PER_ROUND - 1)
+            navigate("/finish",
+            {state: {correctResponses: correctResponses + 1,
+            boardsCleared: boardsCleared + 1, category}});
+
           setBoardsCleared(boardsCleared + 1);
           setTopTenListIndex(topTenListIndex + 1);
           setAnswers(Array.from(Array(constants.LIST_LENGTH), () => false));
           setNumLives(constants.NUM_LIVES);
         }
       } else {
+          if (numLives <= 1)
+            navigate("/finish", {state: {correctResponses, boardsCleared, category}});
+
           setStreak(0);
           setNumLives(numLives - 1);
-
-          if (numLives <= 0) {
-            navigate("/finish", {state: {correctResponses, boardsCleared}});
-          }
       }
 
       (event.target as HTMLInputElement).value = "";
@@ -83,11 +87,6 @@ const Category: React.FC = () => {
     topTenListsRef.current = topTenLists.filter(list => list.category === category);
     setTopTenListIndex(0);
   }, []);
-
-  useEffect(() => {
-    if (boardsCleared >= constants.LISTS_PER_ROUND)
-      navigate("/finish", {state: {correctResponses, boardsCleared, category}});
-  }, [boardsCleared]);
 
   return (
     <Box
