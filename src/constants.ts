@@ -6,4 +6,4 @@ export const CATEGORIES = [
     "Geography",
 ];
 export const NUM_LIVES = 3;
-export const LISTS_PER_ROUND = 1;
+export const LISTS_PER_ROUND = 2;
