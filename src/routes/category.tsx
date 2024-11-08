@@ -24,15 +24,19 @@ type TopTenList = {
   question: string;
   answerList: string[];
   category: string;
-}
+};
 
 const Category: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const topTenListsRef = useRef<TopTenList[]>([]);
-  const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(undefined);
-  const [answers, setAnswers] = useState<boolean[]>(Array.from(Array(constants.LIST_LENGTH), () => false));
+  const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(
+    undefined
+  );
+  const [answers, setAnswers] = useState<boolean[]>(
+    Array.from(Array(constants.LIST_LENGTH), () => false)
+  );
 
   const [numLives, setNumLives] = useState(constants.NUM_LIVES);
   const [streak, setStreak] = useState(0);
@@ -40,13 +44,16 @@ const Category: React.FC = () => {
   const [correctResponses, setCorrectResponses] = useState(0);
   const [boardsCleared, setBoardsCleared] = useState(0);
 
-  const {category} = location.state as {category: string};
+  const { category } = location.state as { category: string };
 
   const handleGuess = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      const guess = (event.target as HTMLInputElement).value.trim().toLowerCase();
-      const answerList = topTenListsRef.current[topTenListIndex || 0]?.answerList
-      .map(answer => answer.toLowerCase());
+      const guess = (event.target as HTMLInputElement).value
+        .trim()
+        .toLowerCase();
+      const answerList = topTenListsRef.current[
+        topTenListIndex || 0
+      ]?.answerList.map((answer) => answer.toLowerCase());
       const answerLoc = answerList.indexOf(guess);
 
       if (answerLoc !== -1) {
@@ -62,9 +69,13 @@ const Category: React.FC = () => {
 
         if (!newAnswers.includes(false) && topTenListIndex !== undefined) {
           if (boardsCleared >= constants.LISTS_PER_ROUND - 1)
-            navigate("/finish",
-            {state: {correctResponses: correctResponses + 1,
-            boardsCleared: boardsCleared + 1, category}});
+            navigate("/finish", {
+              state: {
+                correctResponses: correctResponses + 1,
+                boardsCleared: boardsCleared + 1,
+                category,
+              },
+            });
 
           setBoardsCleared(boardsCleared + 1);
           setTopTenListIndex(topTenListIndex + 1);
@@ -72,19 +83,23 @@ const Category: React.FC = () => {
           setNumLives(constants.NUM_LIVES);
         }
       } else {
-          if (numLives <= 1)
-            navigate("/finish", {state: {correctResponses, boardsCleared, category}});
+        if (numLives <= 1)
+          navigate("/finish", {
+            state: { correctResponses, boardsCleared, category },
+          });
 
-          setStreak(0);
-          setNumLives(numLives - 1);
+        setStreak(0);
+        setNumLives(numLives - 1);
       }
 
       (event.target as HTMLInputElement).value = "";
     }
-  }
+  };
 
   useEffect(() => {
-    topTenListsRef.current = topTenLists.filter(list => list.category === category);
+    topTenListsRef.current = topTenLists.filter(
+      (list) => list.category === category
+    );
     setTopTenListIndex(0);
   }, []);
 
@@ -94,73 +109,103 @@ const Category: React.FC = () => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      minHeight="100vh"
     >
-      <Box display="flex" alignItems="center" mb={4}>
-        <img
-          src={logo}
-          alt="Logo"
-          style={{ width: "100px", marginRight: "2em" }}
-        />
-        <Box
-          sx={{
-            backgroundColor: "white",
-            borderRadius: "8px",
-            padding: "10px",
-            flexGrow: 1,
-            marginRight: "20px",
-          }}
-        >
-          <Typography variant="h6" sx={{ color: "black" }}>
-            {topTenListsRef.current[topTenListIndex || 0]?.question}
-          </Typography>
-        </Box>
-        <Box display="flex" alignItems="center">
-          <Typography variant="h6" mr={1}>
-            Lives:
-          </Typography>
-          {[...Array(numLives)].map((_, index) => (
-            <img key={index} src={heart} alt="Heart" style={{ width: "4em" }} />
-          ))}
-        </Box>
+      <Box
+        sx={{
+          maxWidth: "500px",
+          backgroundColor: "white",
+          borderRadius: "8px",
+          padding: "1em",
+          marginTop: "2em",
+          marginBottom: "2em",
+        }}
+      >
+        <Typography variant="h6" sx={{ color: "black", textAlign: "center" }}>
+          {topTenListsRef.current[topTenListIndex || 0]?.question}
+        </Typography>
       </Box>
-      <Typography variant="h6" mb={2}>
-        Streak: {streak}
-      </Typography>
-      <Box sx={{ flexGrow: 1 }}>
-        <Grid
-          container
-          spacing={{ xs: 2, md: 3 }}
-          columns={{ xs: 4, sm: 8}}
-        >
-          {Array.from(Array(constants.LIST_LENGTH)).map((_, index) => (
-            <Grid key={index} size={{ xs: 2, sm: 4, md: 4 }}>
-              <Item
-                sx={{
-                  fontSize: "1.5em",
-                  color: "black",
-                  textAlign: "left",
-                }}
-              >
-                {index + 1}&#46;
-                {answers[index] && 
-                " " + topTenListsRef.current[topTenListIndex || 0]?.answerList[index]}
-              </Item>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
+
+      {/* User input */}
       <TextField
         variant="filled"
         label="Your Guess"
-        fullWidth
         onKeyUp={handleGuess}
         sx={{
           marginBottom: "20px",
           backgroundColor: "white",
           borderRadius: "4px",
+          minWidth: "300px",
         }}
       />
+
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        mb={2}
+        sx={{
+          width: "100%",
+          maxWidth: "500px",
+        }}
+      >
+        <Typography variant="h6" mr={3}>
+          Streak: {streak}
+        </Typography>
+        <Box
+          display="flex"
+          alignItems="center"
+          sx={{
+            flexShrink: 0, // Prevent the box from shrinking
+            minWidth: "180px", // Ensure enough room for hearts
+          }}
+        >
+          <Typography variant="h6" mr={1}>
+            Lives:
+          </Typography>
+          {[...Array(numLives)].map((_, index) => (
+            <img key={index} src={heart} alt="Heart" style={{ width: "2em" }} />
+          ))}
+        </Box>
+      </Box>
+
+      {/* Grid of 10 answers, see https://mui.com/material-ui/react-grid2/ */}
+      {/* Note: could not get MUI grid formatted properly with regular props.
+          so used regular CSS */}
+      <Box marginBottom={5}>
+        <Grid
+          container
+          spacing={2}
+          columns={2}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)", // 2 equal columns
+          }}
+        >
+          {Array.from(Array(constants.LIST_LENGTH)).map((_, index) => (
+            <Grid key={index}>
+              <Item
+                sx={{
+                  fontSize: "1.5em",
+                  color: "black",
+                  textAlign: "left",
+                  minWidth: "100px",
+                }}
+              >
+                {index + 1}.{" "}
+                {answers[index] &&
+                  topTenListsRef.current[topTenListIndex || 0]?.answerList[
+                    index
+                  ]}
+              </Item>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      <Box display="flex" justifyContent="center">
+        <img src={logo} alt="Logo" style={{ width: "150px" }} />
+      </Box>
+
       {/* <Button
         variant="contained"
         sx={{
@@ -174,7 +219,6 @@ const Category: React.FC = () => {
       >
         Check
       </Button> */}
-
     </Box>
   );
 };
