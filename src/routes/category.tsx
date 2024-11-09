@@ -31,12 +31,8 @@ const Category: React.FC = () => {
   const navigate = useNavigate();
 
   const topTenListsRef = useRef<TopTenList[]>([]);
-  const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(
-    undefined
-  );
-  const [answers, setAnswers] = useState<boolean[]>(
-    Array.from(Array(constants.LIST_LENGTH), () => false)
-  );
+  const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(undefined);
+  const [guessedAnswers, setGuessedAnswers] = useState<boolean[]>(Array.from(Array(constants.LIST_LENGTH), () => false));
 
   const [numLives, setNumLives] = useState(constants.NUM_LIVES);
   const [streak, setStreak] = useState(0);
@@ -48,23 +44,21 @@ const Category: React.FC = () => {
 
   const handleGuess = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      const guess = (event.target as HTMLInputElement).value
-        .trim()
-        .toLowerCase();
-      const answerList = topTenListsRef.current[
-        topTenListIndex || 0
-      ]?.answerList.map((answer) => answer.toLowerCase());
+      const guess = (event.target as HTMLInputElement).value.trim().toLowerCase();
+      if (guess === "") return;
+
+      const answerList = topTenListsRef.current[topTenListIndex || 0]?.answerList
+      .map(answer => answer.toLowerCase());
       const answerLoc = answerList.indexOf(guess);
 
       if (answerLoc !== -1) {
-        if (answers[answerLoc]) return;
+        if (guessedAnswers[answerLoc]) return;
 
-        const newAnswers = [...answers];
+        const newAnswers = [...guessedAnswers];
         newAnswers[answerLoc] = true;
-        setAnswers(newAnswers);
+        setGuessedAnswers(newAnswers);
 
         setCorrectResponses(correctResponses + 1);
-
         setStreak(streak + 1);
 
         if (!newAnswers.includes(false) && topTenListIndex !== undefined) {
@@ -79,7 +73,7 @@ const Category: React.FC = () => {
 
           setBoardsCleared(boardsCleared + 1);
           setTopTenListIndex(topTenListIndex + 1);
-          setAnswers(Array.from(Array(constants.LIST_LENGTH), () => false));
+          setGuessedAnswers(Array.from(Array(constants.LIST_LENGTH), () => false));
           setNumLives(constants.NUM_LIVES);
         }
       } else {
@@ -191,11 +185,9 @@ const Category: React.FC = () => {
                   minWidth: "100px",
                 }}
               >
-                {index + 1}.{" "}
-                {answers[index] &&
-                  topTenListsRef.current[topTenListIndex || 0]?.answerList[
-                    index
-                  ]}
+                {index + 1}&#46;
+                {guessedAnswers[index] && 
+                " " + topTenListsRef.current[topTenListIndex || 0]?.answerList[index]}
               </Item>
             </Grid>
           ))}
