@@ -8,7 +8,7 @@ interface SoundEffectsContextProps {
 }
 
 export const SoundEffectsContext = createContext<SoundEffectsContextProps>({
-  soundEffectVolume: 30,
+  soundEffectVolume: 50,
   setSoundEffectVolume: () => {},
   playSound: () => {},
 });
@@ -16,7 +16,7 @@ export const SoundEffectsContext = createContext<SoundEffectsContextProps>({
 export const SoundEffectsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [soundEffectVolume, setSoundEffectVolume] = useState<number>(30);
+  const [soundEffectVolume, setSoundEffectVolume] = useState<number>(50);
 
   const playSound = (sound: string) => {
     const audio = new Audio(sound);
