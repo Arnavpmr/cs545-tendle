@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useContext } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,22 +12,23 @@ import {
   FormControl,
   InputLabel,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import logo from "../assets/logo.png";
 import * as constants from "../constants";
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 // Settings page
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SettingsIcon from "@mui/icons-material/Settings";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import Slider from "@mui/material/Slider";
 import VolumeDown from "@mui/icons-material/VolumeDown";
 import VolumeUp from "@mui/icons-material/VolumeUp";
+import { MusicContext } from "../sound/MusicContext";
 
 // Transition component for the dialog
 const Transition = React.forwardRef(function Transition(
@@ -40,7 +41,10 @@ const Transition = React.forwardRef(function Transition(
 const Root: React.FC = () => {
   const [category, setCategory] = useState("General Knowledge");
   const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const [musicVolume, setMusicVolume] = React.useState<number>(30);
+  const { musicVolume, setMusicVolume } = useContext(MusicContext);
+  const [musicConsentDialogOpen, setMusicConsentDialogOpen] =
+    useState<boolean>(true);
+  // TODO: sound effect volume
   const [soundEffectVolume, setSoundEffectVolume] = React.useState<number>(30);
   const navigate = useNavigate();
 
@@ -65,6 +69,15 @@ const Root: React.FC = () => {
     newValue: number | number[]
   ) => {
     setSoundEffectVolume(newValue as number);
+  };
+
+  const handleMusicConsent = (consent: boolean) => {
+    if (consent) {
+      setMusicVolume(30); // Set to default volume
+    } else {
+      setMusicVolume(0);
+    }
+    setMusicConsentDialogOpen(false);
   };
 
   return (
@@ -120,7 +133,7 @@ const Root: React.FC = () => {
 
           {/* Play Button */}
           <Button
-          startIcon={<PlayArrowIcon />}
+            startIcon={<PlayArrowIcon />}
             variant="contained"
             color="warning"
             sx={{
@@ -168,6 +181,28 @@ const Root: React.FC = () => {
           >
             Settings
           </Button>
+
+          {/* Music Consent Dialog */}
+          <Dialog
+            open={musicConsentDialogOpen}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={() => handleMusicConsent(false)}
+            aria-labelledby="music-consent-dialog-title"
+          >
+            <DialogTitle id="music-consent-dialog-title">
+              Play Background Music?
+            </DialogTitle>
+            <DialogContent>
+              <Typography>
+                Would you like to enable background music?
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => handleMusicConsent(true)}>Yes</Button>
+              <Button onClick={() => handleMusicConsent(false)}>No</Button>
+            </DialogActions>
+          </Dialog>
 
           {/* Settings Dialog */}
           <Dialog
@@ -217,6 +252,23 @@ const Root: React.FC = () => {
               <Button onClick={handleSettingsClose}>Close</Button>
             </DialogActions>
           </Dialog>
+
+          {/* Attribution Text */}
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: 0,
+              width: "100%",
+              textAlign: "center",
+              padding: "0.5em",
+            }}
+          >
+            <Typography variant="caption" color="textSecondary">
+              Music I use: Bensound.com
+              <br />
+              License code: IO401RZ5ITTRKR2Q
+            </Typography>
+          </Box>
         </Box>
       </Container>
     </Box>

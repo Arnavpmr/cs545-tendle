@@ -8,6 +8,7 @@ import heart from "../assets/heart.png";
 import { styled } from "@mui/material/styles";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 
 import * as constants from "../constants";
 
@@ -214,6 +215,32 @@ const Category: React.FC = () => {
         </Box>
       </Box>
 
+      {/* Swap Button */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "1em",
+        }}
+      >
+        <Button
+          startIcon={<SwapHorizIcon />}
+          variant="contained"
+          sx={{
+            backgroundColor: "#de6143",
+            color: "white",
+            fontSize: "1em",
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: "#c55030",
+            },
+          }}
+          disabled
+        >
+          Swap
+        </Button>
+      </Box>
+
       {/* Grid of 10 answers, see https://mui.com/material-ui/react-grid2/ */}
       {/* Note: could not get MUI grid formatted properly with regular props.
           so used regular CSS */}
@@ -237,9 +264,11 @@ const Category: React.FC = () => {
                 color: "black",
                 textAlign: "left",
                 minWidth: "100px",
+                maxWidth: "300px",
+                wordWrap: "break-word",
               }}
             >
-              {"1. Default answer"}
+              {"1. Default answer lalalalalalalalalalallalalalalalalalalalala"}
             </Item>
           </Grid>
           <Grid>
@@ -249,6 +278,8 @@ const Category: React.FC = () => {
                 color: "black",
                 textAlign: "left",
                 minWidth: "100px",
+                maxWidth: "300px",
+                wordWrap: "break-word",
                 // border: "2px dashed black",
                 backgroundColor: "grey.400",
                 boxShadow: 3,
@@ -264,6 +295,8 @@ const Category: React.FC = () => {
                 color: "white",
                 textAlign: "left",
                 minWidth: "100px",
+                maxWidth: "300px",
+                wordWrap: "break-word",
                 backgroundColor: "success.main",
               }}
             >
@@ -277,6 +310,8 @@ const Category: React.FC = () => {
                 color: "white",
                 textAlign: "left",
                 minWidth: "100px",
+                maxWidth: "300px",
+                wordWrap: "break-word",
                 backgroundColor: "error.main",
               }}
             >
