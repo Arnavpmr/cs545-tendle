@@ -37,77 +37,137 @@ const Category: React.FC = () => {
   const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(
     undefined
   );
-  const [guessedAnswers, setGuessedAnswers] = useState<boolean[]>(
-    Array.from(Array(constants.LIST_LENGTH), () => false)
-  );
+  const [currentAnswers, setCurrentAnswers] = useState<{answer: string, guessState: string, selected: boolean}[]>([]);
 
   const [numLives, setNumLives] = useState(constants.NUM_LIVES);
-  const [streak, setStreak] = useState(0);
 
-  const [correctResponses, setCorrectResponses] = useState(0);
+  const [swapEnabled, setSwapEnabled] = useState(false);
+  const [continueEnabled, setContinueEnabled] = useState(false);
+  const [submitEnabled, setSubmitEnabled] = useState(true);
   const [boardsCleared, setBoardsCleared] = useState(0);
 
   const { category } = location.state as { category: string };
 
-  const handleGuess = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      const guess = (event.target as HTMLInputElement).value
-        .trim()
-        .toLowerCase();
-      if (guess === "") return;
-
-      const answerList = topTenListsRef.current[
-        topTenListIndex || 0
-      ]?.answerList.map((answer) => answer.toLowerCase());
-      const answerLoc = answerList.indexOf(guess);
-
-      if (answerLoc !== -1) {
-        if (guessedAnswers[answerLoc]) return;
-
-        const newAnswers = [...guessedAnswers];
-        newAnswers[answerLoc] = true;
-        setGuessedAnswers(newAnswers);
-
-        setCorrectResponses(correctResponses + 1);
-        setStreak(streak + 1);
-
-        if (!newAnswers.includes(false) && topTenListIndex !== undefined) {
-          if (boardsCleared >= constants.LISTS_PER_ROUND - 1)
-            navigate("/finish", {
-              state: {
-                correctResponses: correctResponses + 1,
-                boardsCleared: boardsCleared + 1,
-                category,
-              },
-            });
-
-          setBoardsCleared(boardsCleared + 1);
-          setTopTenListIndex(topTenListIndex + 1);
-          setGuessedAnswers(
-            Array.from(Array(constants.LIST_LENGTH), () => false)
-          );
-          setNumLives(constants.NUM_LIVES);
-        }
-      } else {
-        if (numLives <= 1)
-          navigate("/finish", {
-            state: { correctResponses, boardsCleared, category },
-          });
-
-        setStreak(0);
-        setNumLives(numLives - 1);
-      }
-
-      (event.target as HTMLInputElement).value = "";
+  const shuffleArray = <T,>(arr: T[]) => {
+    const newArray = [...arr]; // Create a copy of the array
+  
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // Swap elements
     }
-  };
+  
+    return newArray;
+  }
+
+  const handleAnswerClicked = (i: number) => {
+    setCurrentAnswers(prevCurrentAnswers => {
+      if (currentAnswers[i].guessState === "correct" || numLives === 0) return prevCurrentAnswers;
+
+      const updatedAnswers = prevCurrentAnswers.map((answer, index) => {
+        if (index === i) {
+          return { ...answer, selected: !currentAnswers[i].selected };
+        }
+        return answer;
+      });
+
+      const numSelectedUpdated = updatedAnswers.filter((answer) => answer.selected).length;
+
+      if (numSelectedUpdated > 2) return prevCurrentAnswers;
+
+      if (numSelectedUpdated === 2) setSwapEnabled(true);
+      else setSwapEnabled(false);
+
+      return updatedAnswers;
+    });
+  }
+
+  const handleSwapClicked = () => {
+    const selectedAnswersIndices = currentAnswers
+      .map((answer, i) => (answer.selected ? i : -1))
+      .filter((index) => index !== -1);
+
+    const updatedAnswers = [...currentAnswers];
+
+    updatedAnswers[selectedAnswersIndices[0]].selected = false;
+    updatedAnswers[selectedAnswersIndices[0]].guessState = "default";
+    updatedAnswers[selectedAnswersIndices[1]].selected = false;
+    updatedAnswers[selectedAnswersIndices[1]].guessState = "default";
+
+    const temp = updatedAnswers[selectedAnswersIndices[0]];
+    updatedAnswers[selectedAnswersIndices[0]] = updatedAnswers[selectedAnswersIndices[1]];
+    updatedAnswers[selectedAnswersIndices[1]] = temp;
+
+    setCurrentAnswers(updatedAnswers);
+    setSwapEnabled(false);
+  }
+
+  const handleSubmitClicked = () => {
+    const correctAnswers = topTenListsRef.current[topTenListIndex || 0].answerList;
+    const updatedAnswers = currentAnswers.map((answer, i) => {
+      if (answer.answer === correctAnswers[i]) {
+        return { ...answer, guessState: "correct" };
+      } else {
+        return { ...answer, guessState: "wrong" };
+      }
+    });
+
+    const numCorrect = updatedAnswers.filter((answer) => answer.guessState === "correct").length;
+
+    if (numCorrect === constants.LIST_LENGTH)
+      setContinueEnabled(true);
+    else 
+      setNumLives(prevNumLives => {
+        const updatedNumLives = prevNumLives - 1;
+
+        if (updatedNumLives === 0) {
+          setContinueEnabled(true);
+          setSubmitEnabled(false);
+        }
+
+        return updatedNumLives;
+      });
+
+    setCurrentAnswers(updatedAnswers);
+  }
+
+  const handleContinueClicked = () => {
+    if (numLives === 0)
+      navigate("/finish", { state: { category: category, boardsCleared: boardsCleared } });
+    else if (topTenListIndex === constants.LISTS_PER_ROUND - 1)
+      navigate("/finish", { state: { category: category, boardsCleared: boardsCleared + 1} });
+    else {
+      setCurrentAnswers(
+        shuffleArray(topTenListsRef.current[topTenListIndex || 0 + 1].answerList)
+        .map(
+          (answer) => ({ answer: answer, guessState: "default", selected: false })
+        )
+      );
+      setContinueEnabled(false);
+      setNumLives(constants.NUM_LIVES);
+      setBoardsCleared(boardsCleared + 1);
+      setTopTenListIndex((topTenListIndex || 0) + 1);
+    }
+  }
 
   useEffect(() => {
-    topTenListsRef.current = topTenLists.filter(
-      (list) => list.category === category
+    console.log('loading data');
+    console.log(category);
+    topTenListsRef.current = shuffleArray(
+      topTenLists.filter(
+        (list) => list.category === category
+      )
     );
+
     setTopTenListIndex(0);
-  }, []);
+
+    if (topTenListsRef.current.length > 0)
+      setCurrentAnswers(
+        shuffleArray(topTenListsRef.current[0].answerList)
+        .map(
+          (answer) => ({ answer: answer, guessState: "default", selected: false })
+        )
+      );
+  }, [category]);
 
   return (
     <Box
@@ -151,8 +211,10 @@ const Category: React.FC = () => {
           }}
           variant="contained"
           startIcon={<CheckCircleOutlineIcon />}
+          disabled={!submitEnabled}
+          onClick={handleSubmitClicked}
         >
-          Check Answers
+          Submit Answers
         </Button>
         <Button
           sx={{
@@ -166,6 +228,8 @@ const Category: React.FC = () => {
           }}
           variant="contained"
           endIcon={<NavigateNextIcon />}
+          disabled={!continueEnabled}
+          onClick={handleContinueClicked}
         >
           Continue
         </Button>
@@ -195,9 +259,6 @@ const Category: React.FC = () => {
           maxWidth: "500px",
         }}
       >
-        <Typography variant="h6" mr={3}>
-          Streak: {streak}
-        </Typography>
         <Box
           display="flex"
           alignItems="center"
@@ -235,7 +296,8 @@ const Category: React.FC = () => {
               backgroundColor: "#c55030",
             },
           }}
-          disabled
+          disabled={!swapEnabled}
+          onClick={handleSwapClicked}
         >
           Swap
         </Button>
@@ -254,70 +316,89 @@ const Category: React.FC = () => {
             gridTemplateColumns: "repeat(2, 1fr)", // 2 equal columns
           }}
         >
-          {/* FIXME: basic example of the 4 answer box types */}
-          {/* Probably no drag and drop, instead click/tap 2 boxes to swap them */}
-          {/* TODO: change cursor to grab handle, https://smart-interface-design-patterns.com/articles/drag-and-drop-ux/ */}
-          <Grid>
-            <Item
-              sx={{
-                fontSize: "1em",
-                color: "black",
-                textAlign: "left",
-                minWidth: "100px",
-                maxWidth: "300px",
-                wordWrap: "break-word",
-              }}
-            >
-              {"1. Default answer lalalalalalalalalalallalalalalalalalalalala"}
-            </Item>
-          </Grid>
-          <Grid>
-            <Item
-              sx={{
-                fontSize: "1em",
-                color: "black",
-                textAlign: "left",
-                minWidth: "100px",
-                maxWidth: "300px",
-                wordWrap: "break-word",
-                // border: "2px dashed black",
-                backgroundColor: "grey.400",
-                boxShadow: 3,
-              }}
-            >
-              {"2. Answer selected"}
-            </Item>
-          </Grid>
-          <Grid>
-            <Item
-              sx={{
-                fontSize: "1em",
-                color: "white",
-                textAlign: "left",
-                minWidth: "100px",
-                maxWidth: "300px",
-                wordWrap: "break-word",
-                backgroundColor: "success.main",
-              }}
-            >
-              {"3. Right Answer"}
-            </Item>
-          </Grid>
-          <Grid>
-            <Item
-              sx={{
-                fontSize: "1em",
-                color: "white",
-                textAlign: "left",
-                minWidth: "100px",
-                maxWidth: "300px",
-                wordWrap: "break-word",
-                backgroundColor: "error.main",
-              }}
-            >
-              {"4. Wrong Answer"}
-            </Item>
-          </Grid>
+          {currentAnswers.map((answer, i) => {
+            if (answer.guessState === "correct")
+              return (
+                <Grid key={i}>
+                  <Item
+                    onClick={() => handleAnswerClicked(i)}
+                    sx={{
+                      fontSize: "1em",
+                      color: "white",
+                      textAlign: "left",
+                      minWidth: "100px",
+                      maxWidth: "300px",
+                      wordWrap: "break-word",
+                      backgroundColor: "success.main",
+                    }}
+                  >
+                    {i+1}. {answer.answer}
+                  </Item>
+                </Grid>
+              );
+
+            if (answer.selected)
+              return (
+                <Grid key={i}>
+                  <Item
+                    onClick={() => handleAnswerClicked(i)}
+                    sx={{
+                      fontSize: "1em",
+                      color: "black",
+                      textAlign: "left",
+                      minWidth: "100px",
+                      maxWidth: "300px",
+                      wordWrap: "break-word",
+                      // border: "2px dashed black",
+                      backgroundColor: "grey.400",
+                      boxShadow: 3,
+                    }}
+                  >
+                    {i+1}. {answer.answer}
+                  </Item>
+                </Grid>
+              );
+            
+            if (answer.guessState === "default")
+              return (
+                <Grid key={i}>
+                  <Item
+                    onClick={() => handleAnswerClicked(i)}
+                    sx={{
+                      fontSize: "1em",
+                      color: "black",
+                      textAlign: "left",
+                      minWidth: "100px",
+                      maxWidth: "300px",
+                      wordWrap: "break-word",
+                    }}
+                  >
+                    {i+1}. {answer.answer}
+                  </Item>
+                </Grid>
+              );
+
+              if (answer.guessState === "wrong")
+                return (
+                  <Grid key={i}>
+                    <Item
+                      onClick={() => handleAnswerClicked(i)}
+                      sx={{
+                        fontSize: "1em",
+                        color: "white",
+                        textAlign: "left",
+                        minWidth: "100px",
+                        maxWidth: "300px",
+                        wordWrap: "break-word",
+                        backgroundColor: "error.main",
+                      }}
+                    >
+                      {i+1}. {answer.answer}
+                    </Item>
+                  </Grid>
+                );
+            
+          })}
           {/* Skipped defining the other items, would be one of the 4 answer box types above */}
 
           {/* {Array.from(Array(constants.LIST_LENGTH)).map((_, index) => (

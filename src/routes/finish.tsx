@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const Finish: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { correctResponses, category, boardsCleared } = location.state;
+  const { category, boardsCleared } = location.state;
 
   return (
     <Box
@@ -22,8 +22,7 @@ const Finish: React.FC = () => {
         style={{ width: "150px", marginBottom: "20px" }}
       />
       <Typography variant="h4" gutterBottom>
-        Congratulations! You earned {correctResponses * 10} points by giving {correctResponses} correct responses and
-        clearing {boardsCleared} {boardsCleared === 1 ? "board" : "boards"}!
+        Congratulations! You earned {boardsCleared * 10} points and cleared {boardsCleared} {boardsCleared === 1 ? "board" : "boards"}!
       </Typography>
       <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
         <Button

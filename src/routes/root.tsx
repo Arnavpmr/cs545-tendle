@@ -35,6 +35,8 @@ import { SoundEffectsContext } from "../sound/SoundEffectsContext";
 import menuButtonSound from "../sound/audio/menuButton.mp3";
 import gameStartSound from "../sound/audio/gameStart.mp3";
 
+import { CATEGORIES } from "../constants";
+
 // Transition component for the dialog
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & { children: React.ReactElement },
@@ -44,7 +46,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 const Root: React.FC = () => {
-  const [category, setCategory] = useState("General Knowledge");
+  const [category, setCategory] = useState(CATEGORIES[0]);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const { musicVolume, setMusicVolume } = useContext(MusicContext);
   const [musicConsentDialogOpen, setMusicConsentDialogOpen] =
@@ -69,13 +71,13 @@ const Root: React.FC = () => {
     setSettingsOpen(false);
   };
   const handleMusicVolumeChange = (
-    event: Event,
+    _: Event,
     newValue: number | number[]
   ) => {
     setMusicVolume(newValue as number);
   };
   const handleSoundEffectVolumeChange = (
-    event: Event,
+    _: Event,
     newValue: number | number[]
   ) => {
     setSoundEffectVolume(newValue as number);
@@ -114,7 +116,7 @@ const Root: React.FC = () => {
             style={{ width: "250px", marginBottom: "20px" }}
           />
           <Typography variant="h4" gutterBottom>
-            Try to guess the top 10 items in a category!
+            Try to guess the correct order of the top 10 items in a category!
           </Typography>
           <Typography variant="h6" gutterBottom>
             Select a category:
@@ -279,7 +281,7 @@ const Root: React.FC = () => {
             }}
           >
             <Typography variant="caption" color="textSecondary">
-              Music I use: Bensound.com
+              Music used: Bensound.com
               <br />
               License code: IO401RZ5ITTRKR2Q
             </Typography>
