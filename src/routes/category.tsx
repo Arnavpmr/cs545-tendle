@@ -261,7 +261,7 @@ const Category: React.FC = () => {
             <Item
               sx={{
                 fontSize: "1em",
-                color: "black",
+                color: "white",
                 textAlign: "left",
                 minWidth: "100px",
                 backgroundColor: "success.main",
@@ -274,7 +274,7 @@ const Category: React.FC = () => {
             <Item
               sx={{
                 fontSize: "1em",
-                color: "black",
+                color: "white",
                 textAlign: "left",
                 minWidth: "100px",
                 backgroundColor: "error.main",
