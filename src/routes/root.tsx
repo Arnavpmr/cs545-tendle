@@ -256,11 +256,11 @@ const Root: React.FC = () => {
           {/* Attribution Text */}
           <Box
             sx={{
-              position: "fixed",
+              position: "static",
               bottom: 0,
               width: "100%",
               textAlign: "center",
-              padding: "0.5em",
+              padding: "1em",
             }}
           >
             <Typography variant="caption" color="textSecondary">
