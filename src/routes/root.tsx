@@ -29,6 +29,11 @@ import Slider from "@mui/material/Slider";
 import VolumeDown from "@mui/icons-material/VolumeDown";
 import VolumeUp from "@mui/icons-material/VolumeUp";
 import { MusicContext } from "../sound/MusicContext";
+import { SoundEffectsContext } from "../sound/SoundEffectsContext";
+
+// Import sound effects
+import menuButtonSound from "../sound/audio/menuButton.mp3";
+import gameStartSound from "../sound/audio/gameStart.mp3";
 
 // Transition component for the dialog
 const Transition = React.forwardRef(function Transition(
@@ -45,7 +50,11 @@ const Root: React.FC = () => {
   const [musicConsentDialogOpen, setMusicConsentDialogOpen] =
     useState<boolean>(true);
   // TODO: sound effect volume
-  const [soundEffectVolume, setSoundEffectVolume] = React.useState<number>(30);
+  const {
+    soundEffectVolume,
+    setSoundEffectVolume,
+    playSound,
+  } = useContext(SoundEffectsContext);
   const navigate = useNavigate();
 
   const handleCategoryChange = (event: SelectChangeEvent) => {
@@ -53,6 +62,7 @@ const Root: React.FC = () => {
   };
 
   const handleSettingsOpen = () => {
+    playSound(menuButtonSound);
     setSettingsOpen(true);
   };
   const handleSettingsClose = () => {
@@ -142,9 +152,10 @@ const Root: React.FC = () => {
               fontWeight: "bold",
               width: "175px",
             }}
-            onClick={() =>
-              navigate(`/category`, { replace: true, state: { category } })
-            }
+            onClick={() => {
+              playSound(gameStartSound);
+              navigate(`/category`, { replace: true, state: { category } });
+            }}
           >
             Play
           </Button>
@@ -159,8 +170,12 @@ const Root: React.FC = () => {
               fontFamily: "Arial,Helvetica,sans-serif",
               fontWeight: "bold",
               width: "175px",
+              marginTop: "1em",
             }}
-            style={{ marginTop: "1em" }}
+            onClick={() => {
+              playSound(menuButtonSound);
+              // TODO: Add tutorial navigation or action here
+            }}
           >
             Tutorial
           </Button>
@@ -191,7 +206,7 @@ const Root: React.FC = () => {
             aria-labelledby="music-consent-dialog-title"
           >
             <DialogTitle id="music-consent-dialog-title">
-              Play Background Music?
+              Play Background Music
             </DialogTitle>
             <DialogContent>
               <Typography>

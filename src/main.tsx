@@ -7,6 +7,7 @@ import Category from "./routes/category";
 import Finish from "./routes/finish";
 import ErrorPage from "./error-page";
 import { MusicProvider } from "./sound/MusicContext";
+import { SoundEffectsProvider } from "./sound/SoundEffectsContext";
 import AudioPlayer from "./sound/AudioPlayer";
 
 const router = createBrowserRouter([
@@ -30,8 +31,10 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <MusicProvider>
-      <AudioPlayer />
-      <RouterProvider router={router} />
+      <SoundEffectsProvider>
+        <AudioPlayer />
+        <RouterProvider router={router} />
+      </SoundEffectsProvider>
     </MusicProvider>
   </React.StrictMode>
 );
