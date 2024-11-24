@@ -1,7 +1,7 @@
 // Audio playback controlled by music volume
 import React, { useEffect, useRef, useContext } from "react";
 import { MusicContext } from "./MusicContext";
-import moonlightDrive from "./moonlightdrive.mp3";
+import moonlightDrive from "./audio/moonlight-drive.mp3";
 
 const AudioPlayer: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
