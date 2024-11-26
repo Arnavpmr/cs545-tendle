@@ -13,12 +13,13 @@ const Finish: React.FC = () => {
 
   const handleCategoryClick = () => {
     playSound(menuButtonSound);
-    navigate("/category", { replace: true, state: { category } });
+    navigate("/", { replace: true });
+    
   };
 
   const handlePlayAgainClick = () => {
     playSound(menuButtonSound);
-    navigate("/", { replace: true });
+    navigate("/category", { replace: true, state: { category } });
   };
 
   return (
