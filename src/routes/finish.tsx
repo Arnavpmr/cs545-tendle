@@ -21,8 +21,9 @@ const Finish: React.FC = () => {
         alt="Logo"
         style={{ width: "150px", marginBottom: "20px" }}
       />
+      {/* TODO: print point system like 10 pts per correct answer? */}
       <Typography variant="h4" gutterBottom>
-        Congratulations! You earned {boardsCleared * 10} points and cleared {boardsCleared} {boardsCleared === 1 ? "board" : "boards"}!
+        You cleared {boardsCleared} {boardsCleared === 1 ? "board" : "boards"}.
       </Typography>
       <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
         <Button
