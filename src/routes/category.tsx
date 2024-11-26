@@ -37,7 +37,9 @@ const Category: React.FC = () => {
   const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(
     undefined
   );
-  const [currentAnswers, setCurrentAnswers] = useState<{answer: string, guessState: string, selected: boolean}[]>([]);
+  const [currentAnswers, setCurrentAnswers] = useState<
+    { answer: string; guessState: string; selected: boolean }[]
+  >([]);
 
   const [numLives, setNumLives] = useState(constants.NUM_LIVES);
 
@@ -50,18 +52,19 @@ const Category: React.FC = () => {
 
   const shuffleArray = <T,>(arr: T[]) => {
     const newArray = [...arr]; // Create a copy of the array
-  
+
     for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // Swap elements
     }
-  
+
     return newArray;
-  }
+  };
 
   const handleAnswerClicked = (i: number) => {
-    setCurrentAnswers(prevCurrentAnswers => {
-      if (currentAnswers[i].guessState === "correct" || numLives === 0) return prevCurrentAnswers;
+    setCurrentAnswers((prevCurrentAnswers) => {
+      if (currentAnswers[i].guessState === "correct" || numLives === 0)
+        return prevCurrentAnswers;
 
       const updatedAnswers = prevCurrentAnswers.map((answer, index) => {
         if (index === i) {
@@ -70,7 +73,9 @@ const Category: React.FC = () => {
         return answer;
       });
 
-      const numSelectedUpdated = updatedAnswers.filter((answer) => answer.selected).length;
+      const numSelectedUpdated = updatedAnswers.filter(
+        (answer) => answer.selected
+      ).length;
 
       if (numSelectedUpdated > 2) return prevCurrentAnswers;
 
@@ -79,7 +84,7 @@ const Category: React.FC = () => {
 
       return updatedAnswers;
     });
-  }
+  };
 
   const handleSwapClicked = () => {
     const selectedAnswersIndices = currentAnswers
@@ -94,29 +99,32 @@ const Category: React.FC = () => {
     updatedAnswers[selectedAnswersIndices[1]].guessState = "default";
 
     const temp = updatedAnswers[selectedAnswersIndices[0]];
-    updatedAnswers[selectedAnswersIndices[0]] = updatedAnswers[selectedAnswersIndices[1]];
+    updatedAnswers[selectedAnswersIndices[0]] =
+      updatedAnswers[selectedAnswersIndices[1]];
     updatedAnswers[selectedAnswersIndices[1]] = temp;
 
     setCurrentAnswers(updatedAnswers);
     setSwapEnabled(false);
-  }
+  };
 
   const handleSubmitClicked = () => {
-    const correctAnswers = topTenListsRef.current[topTenListIndex || 0].answerList;
+    const correctAnswers =
+      topTenListsRef.current[topTenListIndex || 0].answerList;
     const updatedAnswers = currentAnswers.map((answer, i) => {
       if (answer.answer === correctAnswers[i]) {
-        return { ...answer, guessState: "correct" };
+        return { ...answer, guessState: "correct", selected: false };
       } else {
-        return { ...answer, guessState: "wrong" };
+        return { ...answer, guessState: "wrong", selected: false };
       }
     });
 
-    const numCorrect = updatedAnswers.filter((answer) => answer.guessState === "correct").length;
+    const numCorrect = updatedAnswers.filter(
+      (answer) => answer.guessState === "correct"
+    ).length;
 
-    if (numCorrect === constants.LIST_LENGTH)
-      setContinueEnabled(true);
-    else 
-      setNumLives(prevNumLives => {
+    if (numCorrect === constants.LIST_LENGTH) setContinueEnabled(true);
+    else
+      setNumLives((prevNumLives) => {
         const updatedNumLives = prevNumLives - 1;
 
         if (updatedNumLives === 0) {
@@ -128,44 +136,50 @@ const Category: React.FC = () => {
       });
 
     setCurrentAnswers(updatedAnswers);
-  }
+  };
 
   const handleContinueClicked = () => {
     if (numLives === 0)
-      navigate("/finish", { state: { category: category, boardsCleared: boardsCleared } });
+      navigate("/finish", {
+        state: { category: category, boardsCleared: boardsCleared },
+      });
     else if (topTenListIndex === constants.LISTS_PER_ROUND - 1)
-      navigate("/finish", { state: { category: category, boardsCleared: boardsCleared + 1} });
+      navigate("/finish", {
+        state: { category: category, boardsCleared: boardsCleared + 1 },
+      });
     else {
       setCurrentAnswers(
-        shuffleArray(topTenListsRef.current[topTenListIndex || 0 + 1].answerList)
-        .map(
-          (answer) => ({ answer: answer, guessState: "default", selected: false })
-        )
+        shuffleArray(
+          topTenListsRef.current[topTenListIndex || 0 + 1].answerList
+        ).map((answer) => ({
+          answer: answer,
+          guessState: "default",
+          selected: false,
+        }))
       );
       setContinueEnabled(false);
       setNumLives(constants.NUM_LIVES);
       setBoardsCleared(boardsCleared + 1);
       setTopTenListIndex((topTenListIndex || 0) + 1);
     }
-  }
+  };
 
   useEffect(() => {
-    console.log('loading data');
+    console.log("loading data");
     console.log(category);
     topTenListsRef.current = shuffleArray(
-      topTenLists.filter(
-        (list) => list.category === category
-      )
+      topTenLists.filter((list) => list.category === category)
     );
 
     setTopTenListIndex(0);
 
     if (topTenListsRef.current.length > 0)
       setCurrentAnswers(
-        shuffleArray(topTenListsRef.current[0].answerList)
-        .map(
-          (answer) => ({ answer: answer, guessState: "default", selected: false })
-        )
+        shuffleArray(topTenListsRef.current[0].answerList).map((answer) => ({
+          answer: answer,
+          guessState: "default",
+          selected: false,
+        }))
       );
   }, [category]);
 
@@ -234,20 +248,6 @@ const Category: React.FC = () => {
           Continue
         </Button>
       </Box>
-
-      {/* User input */}
-      {/* TODO: replace this logic with something else */}
-      {/* <TextField
-        variant="filled"
-        label="Your Guess"
-        onKeyUp={handleGuess}
-        sx={{
-          marginBottom: "20px",
-          backgroundColor: "white",
-          borderRadius: "4px",
-          minWidth: "300px",
-        }}
-      /> */}
 
       <Box
         display="flex"
@@ -332,7 +332,7 @@ const Category: React.FC = () => {
                       backgroundColor: "success.main",
                     }}
                   >
-                    {i+1}. {answer.answer}
+                    {i + 1}. {answer.answer}
                   </Item>
                 </Grid>
               );
@@ -349,16 +349,19 @@ const Category: React.FC = () => {
                       minWidth: "100px",
                       maxWidth: "300px",
                       wordWrap: "break-word",
-                      // border: "2px dashed black",
-                      backgroundColor: "grey.400",
-                      boxShadow: 3,
+                      backgroundColor: "#f6d365",
+                      cursor: "pointer",
+                      "&:hover": {
+                        boxShadow: "0 0 5px black",
+                        border: "1px solid black",
+                      },
                     }}
                   >
-                    {i+1}. {answer.answer}
+                    {i + 1}. {answer.answer}
                   </Item>
                 </Grid>
               );
-            
+
             if (answer.guessState === "default")
               return (
                 <Grid key={i}>
@@ -371,72 +374,49 @@ const Category: React.FC = () => {
                       minWidth: "100px",
                       maxWidth: "300px",
                       wordWrap: "break-word",
+                      cursor: "pointer",
+                      "&:hover": {
+                        boxShadow: "0 0 5px black",
+                        border: "1px solid black",
+                      },
                     }}
                   >
-                    {i+1}. {answer.answer}
+                    {i + 1}. {answer.answer}
                   </Item>
                 </Grid>
               );
 
-              if (answer.guessState === "wrong")
-                return (
-                  <Grid key={i}>
-                    <Item
-                      onClick={() => handleAnswerClicked(i)}
-                      sx={{
-                        fontSize: "1em",
-                        color: "white",
-                        textAlign: "left",
-                        minWidth: "100px",
-                        maxWidth: "300px",
-                        wordWrap: "break-word",
-                        backgroundColor: "error.main",
-                      }}
-                    >
-                      {i+1}. {answer.answer}
-                    </Item>
-                  </Grid>
-                );
-            
+            if (answer.guessState === "wrong")
+              return (
+                <Grid key={i}>
+                  <Item
+                    onClick={() => handleAnswerClicked(i)}
+                    sx={{
+                      fontSize: "1em",
+                      color: "white",
+                      textAlign: "left",
+                      minWidth: "100px",
+                      maxWidth: "300px",
+                      wordWrap: "break-word",
+                      backgroundColor: "error.main",
+                      cursor: "pointer",
+                      "&:hover": {
+                        boxShadow: "0 0 5px white",
+                        border: "1px solid white",
+                      },
+                    }}
+                  >
+                    {i + 1}. {answer.answer}
+                  </Item>
+                </Grid>
+              );
           })}
-          {/* Skipped defining the other items, would be one of the 4 answer box types above */}
-
-          {/* {Array.from(Array(constants.LIST_LENGTH)).map((_, index) => (
-            <Grid key={index}>
-              <Item
-                sx={{
-                  fontSize: "1.25em",
-                  color: "black",
-                  textAlign: "left",
-                  minWidth: "100px",
-                }}
-              >
-                {index + 1}&#46;
-                {guessedAnswers[index] && 
-                " " + topTenListsRef.current[topTenListIndex || 0]?.answerList[index]}
-              </Item>
-            </Grid>
-          ))} */}
         </Grid>
       </Box>
 
       <Box display="flex" justifyContent="center">
         <img src={logo} alt="Logo" style={{ width: "150px" }} />
       </Box>
-
-      {/* <Button
-        variant="contained"
-        sx={{
-          backgroundColor: "#FB8500",
-          fontSize: "1.25em",
-          fontFamily: "Arial,Helvetica,sans-serif",
-          fontWeight: "bold",
-          marginBottom: 4,
-        }}
-        onClick={handleCheckAnswer}
-      >
-        Check
-      </Button> */}
     </Box>
   );
 };
