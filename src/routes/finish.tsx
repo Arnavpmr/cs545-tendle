@@ -1,12 +1,25 @@
-import * as React from "react";
+import { useContext } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import logo from "../assets/logo.png";
 import { useNavigate, useLocation } from "react-router-dom";
+import { SoundEffectsContext } from "../sound/SoundEffectsContext";
+import menuButtonSound from "../sound/audio/menuButton.mp3";
 
 const Finish: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { category, boardsCleared } = location.state;
+  const { playSound } = useContext(SoundEffectsContext);
+
+  const handleCategoryClick = () => {
+    playSound(menuButtonSound);
+    navigate("/category", { replace: true, state: { category } });
+  };
+
+  const handlePlayAgainClick = () => {
+    playSound(menuButtonSound);
+    navigate("/", { replace: true });
+  };
 
   return (
     <Box
@@ -36,7 +49,7 @@ const Finish: React.FC = () => {
             textTransform: "none",
             marginBottom: 4,
           }}
-          onClick={() => navigate("/category", { replace: true, state: { category } })}
+          onClick={handlePlayAgainClick}
         >
           Play Again
         </Button>
@@ -49,7 +62,7 @@ const Finish: React.FC = () => {
             fontWeight: "bold",
             textTransform: "none",
           }}
-          onClick={() => navigate("/", { replace: true })}
+          onClick={handleCategoryClick}
         >
           Change Category
         </Button>
