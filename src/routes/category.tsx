@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import topTenLists from "../data/topTenLists";
-import { Box, Button, Paper, Typography } from "@mui/material";
+import { Box, Button, Fade, Paper, Typography, Zoom } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import logo from "../assets/logo.png";
 import heart from "../assets/heart.png";
@@ -10,6 +10,9 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 
+import { SoundEffectsContext } from "../sound/SoundEffectsContext";
+import menuButtonSound from "../sound/audio/menuButton.mp3";
+import swapSound from "../sound/audio/swap.mp3";
 import * as constants from "../constants";
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -32,6 +35,8 @@ type TopTenList = {
 const Category: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { playSound } = useContext(SoundEffectsContext);
 
   const topTenListsRef = useRef<TopTenList[]>([]);
   const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(
@@ -87,6 +92,8 @@ const Category: React.FC = () => {
   };
 
   const handleSwapClicked = () => {
+    // Play swap button sound
+    playSound(swapSound);
     const selectedAnswersIndices = currentAnswers
       .map((answer, i) => (answer.selected ? i : -1))
       .filter((index) => index !== -1);
@@ -108,6 +115,8 @@ const Category: React.FC = () => {
   };
 
   const handleSubmitClicked = () => {
+    // Play menu button sound
+    playSound(menuButtonSound);
     const correctAnswers =
       topTenListsRef.current[topTenListIndex || 0].answerList;
     const updatedAnswers = currentAnswers.map((answer, i) => {
@@ -123,7 +132,7 @@ const Category: React.FC = () => {
     ).length;
 
     if (numCorrect === constants.LIST_LENGTH) setContinueEnabled(true);
-    else
+    else {
       setNumLives((prevNumLives) => {
         const updatedNumLives = prevNumLives - 1;
 
@@ -134,11 +143,14 @@ const Category: React.FC = () => {
 
         return updatedNumLives;
       });
+    }
 
     setCurrentAnswers(updatedAnswers);
   };
 
   const handleContinueClicked = () => {
+    // Play menu button sound
+    playSound(menuButtonSound);
     if (numLives === 0)
       navigate("/finish", {
         state: { category: category, boardsCleared: boardsCleared },
@@ -270,8 +282,14 @@ const Category: React.FC = () => {
           <Typography variant="h6" mr={1}>
             Lives:
           </Typography>
-          {[...Array(numLives)].map((_, index) => (
-            <img key={index} src={heart} alt="Heart" style={{ width: "2em" }} />
+          {[...Array(constants.NUM_LIVES)].map((_, index) => (
+            <Fade in={index < numLives} timeout={500} key={index} unmountOnExit>
+              <img
+                src={heart}
+                alt="Heart"
+                style={{ width: "2em", marginRight: "0.5em" }}
+              />
+            </Fade>
           ))}
         </Box>
       </Box>
@@ -365,24 +383,30 @@ const Category: React.FC = () => {
             if (answer.guessState === "default")
               return (
                 <Grid key={i}>
-                  <Item
-                    onClick={() => handleAnswerClicked(i)}
-                    sx={{
-                      fontSize: "1em",
-                      color: "black",
-                      textAlign: "left",
-                      minWidth: "100px",
-                      maxWidth: "300px",
-                      wordWrap: "break-word",
-                      cursor: "pointer",
-                      "&:hover": {
-                        boxShadow: "0 0 5px black",
-                        border: "1px solid black",
-                      },
-                    }}
+                  <Zoom
+                    in={true}
+                    timeout={1000}
+                    // style={{ transitionDelay: `${i * 100}ms` }}
                   >
-                    {i + 1}. {answer.answer}
-                  </Item>
+                    <Item
+                      onClick={() => handleAnswerClicked(i)}
+                      sx={{
+                        fontSize: "1em",
+                        color: "black",
+                        textAlign: "left",
+                        minWidth: "100px",
+                        maxWidth: "300px",
+                        wordWrap: "break-word",
+                        cursor: "pointer",
+                        "&:hover": {
+                          boxShadow: "0 0 5px black",
+                          border: "1px solid black",
+                        },
+                      }}
+                    >
+                      {i + 1}. {answer.answer}
+                    </Item>
+                  </Zoom>
                 </Grid>
               );
 
