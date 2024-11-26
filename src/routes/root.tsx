@@ -48,15 +48,11 @@ const Transition = React.forwardRef(function Transition(
 const Root: React.FC = () => {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const { musicVolume, setMusicVolume } = useContext(MusicContext);
-  const [musicConsentDialogOpen, setMusicConsentDialogOpen] =
-    useState<boolean>(true);
+  const { musicVolume, setMusicVolume, hasConsented, setHasConsented } =
+    useContext(MusicContext);
   // TODO: sound effect volume
-  const {
-    soundEffectVolume,
-    setSoundEffectVolume,
-    playSound,
-  } = useContext(SoundEffectsContext);
+  const { soundEffectVolume, setSoundEffectVolume, playSound } =
+    useContext(SoundEffectsContext);
   const navigate = useNavigate();
 
   const handleCategoryChange = (event: SelectChangeEvent) => {
@@ -70,10 +66,7 @@ const Root: React.FC = () => {
   const handleSettingsClose = () => {
     setSettingsOpen(false);
   };
-  const handleMusicVolumeChange = (
-    _: Event,
-    newValue: number | number[]
-  ) => {
+  const handleMusicVolumeChange = (_: Event, newValue: number | number[]) => {
     setMusicVolume(newValue as number);
   };
   const handleSoundEffectVolumeChange = (
@@ -89,7 +82,7 @@ const Root: React.FC = () => {
     } else {
       setMusicVolume(0);
     }
-    setMusicConsentDialogOpen(false);
+    setHasConsented(true);
   };
 
   return (
@@ -201,7 +194,7 @@ const Root: React.FC = () => {
 
           {/* Music Consent Dialog */}
           <Dialog
-            open={musicConsentDialogOpen}
+            open={!hasConsented}
             TransitionComponent={Transition}
             keepMounted
             onClose={() => handleMusicConsent(false)}
