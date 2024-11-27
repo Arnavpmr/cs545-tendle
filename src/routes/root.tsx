@@ -1,5 +1,4 @@
-import React, { useContext } from "react";
-import { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -47,10 +46,9 @@ const Transition = React.forwardRef(function Transition(
 
 const Root: React.FC = () => {
   const [category, setCategory] = useState(CATEGORIES[0]);
-  const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { musicVolume, setMusicVolume, hasConsented, setHasConsented } =
     useContext(MusicContext);
-  // TODO: sound effect volume
   const { soundEffectVolume, setSoundEffectVolume, playSound } =
     useContext(SoundEffectsContext);
   const navigate = useNavigate();

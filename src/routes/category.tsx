@@ -1,7 +1,20 @@
-import { useContext, useState, useEffect, useRef } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import topTenLists from "../data/topTenLists";
-import { Box, Button, Fade, Paper, Typography, Zoom } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fade,
+  Paper,
+  Slider,
+  Stack,
+  Typography,
+  Zoom,
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import logo from "../assets/logo.png";
 import heart from "../assets/heart.png";
@@ -9,11 +22,24 @@ import { styled } from "@mui/material/styles";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import SettingsIcon from "@mui/icons-material/Settings";
 
+import { MusicContext } from "../sound/MusicContext";
 import { SoundEffectsContext } from "../sound/SoundEffectsContext";
 import menuButtonSound from "../sound/audio/menuButton.mp3";
 import swapSound from "../sound/audio/swap.mp3";
 import * as constants from "../constants";
+import { VolumeDown, VolumeUp } from "@mui/icons-material";
+import Slide from "@mui/material/Slide";
+import { TransitionProps } from "@mui/material/transitions";
+
+// Transition component for the dialog
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -36,8 +62,6 @@ const Category: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { playSound } = useContext(SoundEffectsContext);
-
   const topTenListsRef = useRef<TopTenList[]>([]);
   const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(
     undefined
@@ -57,6 +81,27 @@ const Category: React.FC = () => {
   const [continueEnabled, setContinueEnabled] = useState(false);
   const [submitEnabled, setSubmitEnabled] = useState(true);
   const [boardsCleared, setBoardsCleared] = useState(0);
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { soundEffectVolume, setSoundEffectVolume, playSound } =
+    useContext(SoundEffectsContext);
+  const { musicVolume, setMusicVolume } = useContext(MusicContext);
+  const handleSettingsOpen = () => {
+    playSound(menuButtonSound);
+    setSettingsOpen(true);
+  };
+  const handleSettingsClose = () => {
+    setSettingsOpen(false);
+  };
+  const handleMusicVolumeChange = (_: Event, newValue: number | number[]) => {
+    setMusicVolume(newValue as number);
+  };
+  const handleSoundEffectVolumeChange = (
+    _: Event,
+    newValue: number | number[]
+  ) => {
+    setSoundEffectVolume(newValue as number);
+  };
 
   const { category } = location.state as { category: string };
 
@@ -232,6 +277,68 @@ const Category: React.FC = () => {
           {topTenListsRef.current[topTenListIndex || 0]?.question}
         </Typography>
       </Box>
+
+      {/* Settings button */}
+      <Box display="flex" justifyContent="center" marginBottom="1.5em">
+        <Button
+          startIcon={<SettingsIcon />}
+          variant="contained"
+          color="warning"
+          sx={{
+            fontSize: "1em",
+            fontFamily: "Arial,Helvetica,sans-serif",
+            fontWeight: "bold",
+            width: "175px",
+          }}
+          onClick={handleSettingsOpen}
+        >
+          Settings
+        </Button>
+      </Box>
+      {/* Settings Dialog */}
+      <Dialog
+        open={settingsOpen}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleSettingsClose}
+        aria-labelledby="settings-dialog-title"
+      >
+        <DialogTitle id="settings-dialog-title">Volume</DialogTitle>
+        <DialogContent>
+          <Box sx={{ width: 300 }}>
+            {/* Music Volume */}
+            <Typography gutterBottom>Music</Typography>
+            <Stack
+              spacing={2}
+              direction="row"
+              sx={{ alignItems: "center", mb: 2 }}
+            >
+              <VolumeDown />
+              <Slider
+                aria-label="Music Volume"
+                value={musicVolume}
+                onChange={handleMusicVolumeChange}
+              />
+              <VolumeUp />
+            </Stack>
+
+            {/* Sound Effect Volume */}
+            <Typography gutterBottom>Sound Effect</Typography>
+            <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
+              <VolumeDown />
+              <Slider
+                aria-label="Sound Effect Volume"
+                value={soundEffectVolume}
+                onChange={handleSoundEffectVolumeChange}
+              />
+              <VolumeUp />
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSettingsClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Buttons to check answers and continue to next round */}
       <Box
