@@ -43,7 +43,12 @@ const Category: React.FC = () => {
     undefined
   );
   const [currentAnswers, setCurrentAnswers] = useState<
-    { answer: string; guessState: string; selected: boolean }[]
+    {
+      answer: string;
+      guessState: string;
+      selected: boolean;
+      readySwap: boolean;
+    }[]
   >([]);
 
   const [numLives, setNumLives] = useState(constants.NUM_LIVES);
@@ -100,18 +105,27 @@ const Category: React.FC = () => {
 
     const updatedAnswers = [...currentAnswers];
 
-    updatedAnswers[selectedAnswersIndices[0]].selected = false;
-    updatedAnswers[selectedAnswersIndices[0]].guessState = "default";
-    updatedAnswers[selectedAnswersIndices[1]].selected = false;
-    updatedAnswers[selectedAnswersIndices[1]].guessState = "default";
-
-    const temp = updatedAnswers[selectedAnswersIndices[0]];
-    updatedAnswers[selectedAnswersIndices[0]] =
-      updatedAnswers[selectedAnswersIndices[1]];
-    updatedAnswers[selectedAnswersIndices[1]] = temp;
-
+    updatedAnswers[selectedAnswersIndices[0]].readySwap = false;
+    updatedAnswers[selectedAnswersIndices[1]].readySwap = false;
+    // Update state to trigger zoom out
     setCurrentAnswers(updatedAnswers);
-    setSwapEnabled(false);
+
+    setTimeout(() => {
+      updatedAnswers[selectedAnswersIndices[0]].readySwap = true;
+      updatedAnswers[selectedAnswersIndices[1]].readySwap = true;
+      updatedAnswers[selectedAnswersIndices[0]].selected = false;
+      updatedAnswers[selectedAnswersIndices[0]].guessState = "default";
+      updatedAnswers[selectedAnswersIndices[1]].selected = false;
+      updatedAnswers[selectedAnswersIndices[1]].guessState = "default";
+
+      const temp = updatedAnswers[selectedAnswersIndices[0]];
+      updatedAnswers[selectedAnswersIndices[0]] =
+        updatedAnswers[selectedAnswersIndices[1]];
+      updatedAnswers[selectedAnswersIndices[1]] = temp;
+
+      setCurrentAnswers(updatedAnswers);
+      setSwapEnabled(false);
+    }, 500);
   };
 
   const handleSubmitClicked = () => {
@@ -167,6 +181,7 @@ const Category: React.FC = () => {
           answer: answer,
           guessState: "default",
           selected: false,
+          readySwap: true,
         }))
       );
       setContinueEnabled(false);
@@ -191,6 +206,7 @@ const Category: React.FC = () => {
           answer: answer,
           guessState: "default",
           selected: false,
+          readySwap: true,
         }))
       );
   }, [category]);
@@ -335,105 +351,56 @@ const Category: React.FC = () => {
           }}
         >
           {currentAnswers.map((answer, i) => {
-            if (answer.guessState === "correct")
-              return (
-                <Grid key={i}>
+            return (
+              <Grid key={i}>
+                <Zoom
+                  in={answer.readySwap}
+                  timeout={1000}
+                  // style={{ transitionDelay: `${i * 100}ms` }}
+                >
                   <Item
                     onClick={() => handleAnswerClicked(i)}
                     sx={{
                       fontSize: "1em",
-                      color: "white",
+                      backgroundColor: answer.selected
+                        ? "#f6d365"
+                        : answer.guessState === "default"
+                        ? "white"
+                        : answer.guessState === "wrong"
+                        ? "error.main"
+                        : "success.main",
+                      color:
+                        answer.guessState === "default" || answer.selected
+                          ? "black"
+                          : "white",
                       textAlign: "left",
                       minWidth: "100px",
                       maxWidth: "300px",
                       wordWrap: "break-word",
-                      backgroundColor: "success.main",
+                      cursor:
+                        answer.guessState !== "correct" ? "pointer" : "default",
+                      "&:hover":
+                        answer.guessState !== "correct"
+                          ? {
+                              boxShadow:
+                                answer.guessState === "default" ||
+                                answer.selected
+                                  ? "0 0 5px black"
+                                  : "0 0 5px white",
+                              border:
+                                answer.guessState === "default" ||
+                                answer.selected
+                                  ? "1px solid black"
+                                  : "1px solid white",
+                            }
+                          : {},
                     }}
                   >
                     {i + 1}. {answer.answer}
                   </Item>
-                </Grid>
-              );
-
-            if (answer.selected)
-              return (
-                <Grid key={i}>
-                  <Item
-                    onClick={() => handleAnswerClicked(i)}
-                    sx={{
-                      fontSize: "1em",
-                      color: "black",
-                      textAlign: "left",
-                      minWidth: "100px",
-                      maxWidth: "300px",
-                      wordWrap: "break-word",
-                      backgroundColor: "#f6d365",
-                      cursor: "pointer",
-                      "&:hover": {
-                        boxShadow: "0 0 5px black",
-                        border: "1px solid black",
-                      },
-                    }}
-                  >
-                    {i + 1}. {answer.answer}
-                  </Item>
-                </Grid>
-              );
-
-            if (answer.guessState === "default")
-              return (
-                <Grid key={i}>
-                  <Zoom
-                    in={true}
-                    timeout={1000}
-                    // style={{ transitionDelay: `${i * 100}ms` }}
-                  >
-                    <Item
-                      onClick={() => handleAnswerClicked(i)}
-                      sx={{
-                        fontSize: "1em",
-                        color: "black",
-                        textAlign: "left",
-                        minWidth: "100px",
-                        maxWidth: "300px",
-                        wordWrap: "break-word",
-                        cursor: "pointer",
-                        "&:hover": {
-                          boxShadow: "0 0 5px black",
-                          border: "1px solid black",
-                        },
-                      }}
-                    >
-                      {i + 1}. {answer.answer}
-                    </Item>
-                  </Zoom>
-                </Grid>
-              );
-
-            if (answer.guessState === "wrong")
-              return (
-                <Grid key={i}>
-                  <Item
-                    onClick={() => handleAnswerClicked(i)}
-                    sx={{
-                      fontSize: "1em",
-                      color: "white",
-                      textAlign: "left",
-                      minWidth: "100px",
-                      maxWidth: "300px",
-                      wordWrap: "break-word",
-                      backgroundColor: "error.main",
-                      cursor: "pointer",
-                      "&:hover": {
-                        boxShadow: "0 0 5px white",
-                        border: "1px solid white",
-                      },
-                    }}
-                  >
-                    {i + 1}. {answer.answer}
-                  </Item>
-                </Grid>
-              );
+                </Zoom>
+              </Grid>
+            );
           })}
         </Grid>
       </Box>
