@@ -8,7 +8,7 @@ import menuButtonSound from "../sound/audio/menuButton.mp3";
 const Finish: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { category, boardsCleared } = location.state;
+  const { category, numAnswersCorrect } = location.state;
   const { playSound } = useContext(SoundEffectsContext);
 
   const handleCategoryClick = () => {
@@ -37,7 +37,7 @@ const Finish: React.FC = () => {
       />
       {/* TODO: print point system like 10 pts per correct answer? */}
       <Typography variant="h4" gutterBottom>
-        You cleared {boardsCleared} {boardsCleared === 1 ? "board" : "boards"}.
+        Score: {numAnswersCorrect * 10}
       </Typography>
       <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
         <Button

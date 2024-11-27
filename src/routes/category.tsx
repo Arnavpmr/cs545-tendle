@@ -80,7 +80,7 @@ const Category: React.FC = () => {
   const [swapEnabled, setSwapEnabled] = useState(false);
   const [continueEnabled, setContinueEnabled] = useState(false);
   const [submitEnabled, setSubmitEnabled] = useState(true);
-  const [boardsCleared, setBoardsCleared] = useState(0);
+  const [numAnswersCorrect, setNumAnswersCorrect] = useState(0);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { soundEffectVolume, setSoundEffectVolume, playSound } =
@@ -208,17 +208,20 @@ const Category: React.FC = () => {
   };
 
   const handleContinueClicked = () => {
+    const numCorrect = currentAnswers.filter(
+      (answer) => answer.guessState === "correct"
+    ).length;
     // Play menu button sound
     playSound(menuButtonSound);
-    if (numLives === 0)
+    if (topTenListIndex === constants.LISTS_PER_ROUND - 1)
       navigate("/finish", {
-        state: { category: category, boardsCleared: boardsCleared },
-      });
-    else if (topTenListIndex === constants.LISTS_PER_ROUND - 1)
-      navigate("/finish", {
-        state: { category: category, boardsCleared: boardsCleared + 1 },
+        state: {
+          category: category,
+          numAnswersCorrect: numAnswersCorrect + numCorrect,
+        },
       });
     else {
+      setNumAnswersCorrect(numAnswersCorrect + numCorrect);
       setCurrentAnswers(
         shuffleArray(
           topTenListsRef.current[topTenListIndex || 0 + 1].answerList
@@ -231,8 +234,8 @@ const Category: React.FC = () => {
       );
       setContinueEnabled(false);
       setNumLives(constants.NUM_LIVES);
-      setBoardsCleared(boardsCleared + 1);
       setTopTenListIndex((topTenListIndex || 0) + 1);
+      setSubmitEnabled(true);
     }
   };
 
