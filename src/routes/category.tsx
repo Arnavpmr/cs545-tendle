@@ -190,7 +190,10 @@ const Category: React.FC = () => {
       (answer) => answer.guessState === "correct"
     ).length;
 
-    if (numCorrect === constants.LIST_LENGTH) setContinueEnabled(true);
+    if (numCorrect === constants.LIST_LENGTH) {
+      setContinueEnabled(true);
+      setSubmitEnabled(false);
+    }
     else {
       setNumLives((prevNumLives) => {
         const updatedNumLives = prevNumLives - 1;
