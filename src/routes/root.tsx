@@ -18,15 +18,16 @@ import {
 } from "@mui/material";
 import logo from "../assets/logo.png";
 import * as constants from "../constants";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-// Settings page
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import SettingsIcon from "@mui/icons-material/Settings";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import Slider from "@mui/material/Slider";
-import VolumeDown from "@mui/icons-material/VolumeDown";
-import VolumeUp from "@mui/icons-material/VolumeUp";
+import {
+  VolumeOff,
+  VolumeUp,
+  PlayArrow,
+  HelpOutline,
+  Settings,
+} from "@mui/icons-material";
 import { MusicContext } from "../sound/MusicContext";
 import { SoundEffectsContext } from "../sound/SoundEffectsContext";
 
@@ -136,7 +137,7 @@ const Root: React.FC = () => {
 
           {/* Play Button */}
           <Button
-            startIcon={<PlayArrowIcon />}
+            startIcon={<PlayArrow />}
             variant="contained"
             color="warning"
             sx={{
@@ -155,7 +156,7 @@ const Root: React.FC = () => {
 
           {/* Tutorial Button */}
           <Button
-            startIcon={<HelpOutlineIcon />}
+            startIcon={<HelpOutline />}
             variant="contained"
             color="warning"
             sx={{
@@ -175,7 +176,7 @@ const Root: React.FC = () => {
 
           {/* Settings Button */}
           <Button
-            startIcon={<SettingsIcon />}
+            startIcon={<Settings />}
             variant="contained"
             color="warning"
             sx={{
@@ -239,7 +240,7 @@ const Root: React.FC = () => {
                   direction="row"
                   sx={{ alignItems: "center", mb: 2 }}
                 >
-                  <VolumeDown />
+                  <VolumeOff />
                   <Slider
                     aria-label="Music Volume"
                     value={musicVolume}
@@ -256,7 +257,7 @@ const Root: React.FC = () => {
                   direction="row"
                   sx={{ alignItems: "center" }}
                 >
-                  <VolumeDown />
+                  <VolumeOff />
                   <Slider
                     aria-label="Sound Effect Volume"
                     value={soundEffectVolume}

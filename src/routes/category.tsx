@@ -19,19 +19,22 @@ import Grid from "@mui/material/Grid2";
 import logo from "../assets/logo.png";
 import heart from "../assets/heart.png";
 import { styled } from "@mui/material/styles";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import SettingsIcon from "@mui/icons-material/Settings";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 
 import { MusicContext } from "../sound/MusicContext";
 import { SoundEffectsContext } from "../sound/SoundEffectsContext";
 import menuButtonSound from "../sound/audio/menuButton.mp3";
 import swapSound from "../sound/audio/swap.mp3";
 import * as constants from "../constants";
-import { VolumeDown, VolumeUp } from "@mui/icons-material";
+import {
+  VolumeOff,
+  VolumeUp,
+  CheckCircleOutline,
+  NavigateNext,
+  SwapHoriz,
+  Settings,
+  HelpOutline,
+  ExitToApp,
+} from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 
@@ -302,7 +305,7 @@ const Category: React.FC = () => {
       <Box display="flex" justifyContent="center" marginBottom="1.5em">
         {/* Quit button */}
         <Button
-          startIcon={<ExitToAppIcon />}
+          startIcon={<ExitToApp />}
           variant="contained"
           color="warning"
           sx={{
@@ -319,7 +322,7 @@ const Category: React.FC = () => {
       <Box display="flex" justifyContent="center" marginBottom="1.5em">
         {/* Settings button */}
         <Button
-          startIcon={<SettingsIcon />}
+          startIcon={<Settings />}
           variant="contained"
           color="warning"
           sx={{
@@ -334,7 +337,7 @@ const Category: React.FC = () => {
         </Button>
         {/* Tutorial/Help button */}
         <Button
-          startIcon={<HelpOutlineIcon />}
+          startIcon={<HelpOutline />}
           variant="contained"
           color="warning"
           sx={{
@@ -379,7 +382,7 @@ const Category: React.FC = () => {
               direction="row"
               sx={{ alignItems: "center", mb: 2 }}
             >
-              <VolumeDown />
+              <VolumeOff />
               <Slider
                 aria-label="Music Volume"
                 value={musicVolume}
@@ -392,7 +395,7 @@ const Category: React.FC = () => {
             {/* Sound Effect Volume */}
             <Typography gutterBottom>Sound Effect</Typography>
             <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
-              <VolumeDown />
+              <VolumeOff />
               <Slider
                 aria-label="Sound Effect Volume"
                 value={soundEffectVolume}
@@ -448,7 +451,7 @@ const Category: React.FC = () => {
             },
           }}
           variant="contained"
-          startIcon={<CheckCircleOutlineIcon />}
+          startIcon={<CheckCircleOutline />}
           disabled={!submitEnabled}
           onClick={handleSubmitClicked}
         >
@@ -465,7 +468,7 @@ const Category: React.FC = () => {
             },
           }}
           variant="contained"
-          endIcon={<NavigateNextIcon />}
+          endIcon={<NavigateNext />}
           disabled={!continueEnabled}
           onClick={handleContinueClicked}
         >
@@ -515,7 +518,7 @@ const Category: React.FC = () => {
         }}
       >
         <Button
-          startIcon={<SwapHorizIcon />}
+          startIcon={<SwapHoriz />}
           variant="contained"
           sx={{
             backgroundColor: "#de6143",
