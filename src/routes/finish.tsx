@@ -1,12 +1,26 @@
-import * as React from "react";
+import { useContext } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import logo from "../assets/logo.png";
 import { useNavigate, useLocation } from "react-router-dom";
+import { SoundEffectsContext } from "../sound/SoundEffectsContext";
+import menuButtonSound from "../sound/audio/menuButton.mp3";
 
 const Finish: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { correctResponses, category, boardsCleared } = location.state;
+  const { category, numAnswersCorrect } = location.state;
+  const { playSound } = useContext(SoundEffectsContext);
+
+  const handleCategoryClick = () => {
+    playSound(menuButtonSound);
+    navigate("/", { replace: true });
+    
+  };
+
+  const handlePlayAgainClick = () => {
+    playSound(menuButtonSound);
+    navigate("/category", { replace: true, state: { category } });
+  };
 
   return (
     <Box
@@ -21,9 +35,9 @@ const Finish: React.FC = () => {
         alt="Logo"
         style={{ width: "150px", marginBottom: "20px" }}
       />
+      {/* TODO: print point system like 10 pts per correct answer? */}
       <Typography variant="h4" gutterBottom>
-        Congratulations! You earned {correctResponses * 10} points by giving {correctResponses} correct responses and
-        clearing {boardsCleared} {boardsCleared === 1 ? "board" : "boards"}!
+        Score: {numAnswersCorrect * 10}
       </Typography>
       <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
         <Button
@@ -36,7 +50,7 @@ const Finish: React.FC = () => {
             textTransform: "none",
             marginBottom: 4,
           }}
-          onClick={() => navigate("/category", { replace: true, state: { category } })}
+          onClick={handlePlayAgainClick}
         >
           Play Again
         </Button>
@@ -49,7 +63,7 @@ const Finish: React.FC = () => {
             fontWeight: "bold",
             textTransform: "none",
           }}
-          onClick={() => navigate("/", { replace: true })}
+          onClick={handleCategoryClick}
         >
           Change Category
         </Button>

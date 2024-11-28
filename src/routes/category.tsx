@@ -1,13 +1,50 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import topTenLists from "../data/topTenLists";
-import { Box, Paper, Typography, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fade,
+  Paper,
+  Slider,
+  Stack,
+  Typography,
+  Zoom,
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import logo from "../assets/logo.png";
 import heart from "../assets/heart.png";
 import { styled } from "@mui/material/styles";
 
+import { MusicContext } from "../sound/MusicContext";
+import { SoundEffectsContext } from "../sound/SoundEffectsContext";
+import menuButtonSound from "../sound/audio/menuButton.mp3";
+import swapSound from "../sound/audio/swap.mp3";
 import * as constants from "../constants";
+import {
+  VolumeOff,
+  VolumeUp,
+  CheckCircleOutline,
+  NavigateNext,
+  SwapHoriz,
+  Settings,
+  HelpOutline,
+  ExitToApp,
+} from "@mui/icons-material";
+import Slide from "@mui/material/Slide";
+import { TransitionProps } from "@mui/material/transitions";
+
+// Transition component for the dialog
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -31,71 +68,217 @@ const Category: React.FC = () => {
   const navigate = useNavigate();
 
   const topTenListsRef = useRef<TopTenList[]>([]);
-  const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(undefined);
-  const [guessedAnswers, setGuessedAnswers] = useState<boolean[]>(Array.from(Array(constants.LIST_LENGTH), () => false));
+  const [topTenListIndex, setTopTenListIndex] = useState<number | undefined>(
+    undefined
+  );
+  const [currentAnswers, setCurrentAnswers] = useState<
+    {
+      answer: string;
+      guessState: string;
+      selected: boolean;
+      readySwap: boolean;
+    }[]
+  >([]);
 
   const [numLives, setNumLives] = useState(constants.NUM_LIVES);
-  const [streak, setStreak] = useState(0);
 
-  const [correctResponses, setCorrectResponses] = useState(0);
-  const [boardsCleared, setBoardsCleared] = useState(0);
+  const [swapEnabled, setSwapEnabled] = useState(false);
+  const [continueEnabled, setContinueEnabled] = useState(false);
+  const [submitEnabled, setSubmitEnabled] = useState(true);
+  const [numAnswersCorrect, setNumAnswersCorrect] = useState(0);
+
+  const [exitDialogOpen, setExitDialogOpen] = useState(false);
+  const handleQuitClick = () => {
+    playSound(menuButtonSound);
+    setExitDialogOpen(true);
+  };
+
+  const handleExitConfirm = () => {
+    navigate("/", { replace: true });
+  };
+
+  const handleExitCancel = () => {
+    setExitDialogOpen(false);
+  };
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { soundEffectVolume, setSoundEffectVolume, playSound } =
+    useContext(SoundEffectsContext);
+  const { musicVolume, setMusicVolume } = useContext(MusicContext);
+  const handleSettingsOpen = () => {
+    playSound(menuButtonSound);
+    setSettingsOpen(true);
+  };
+  const handleSettingsClose = () => {
+    setSettingsOpen(false);
+  };
+  const handleMusicVolumeChange = (_: Event, newValue: number | number[]) => {
+    setMusicVolume(newValue as number);
+  };
+  const handleSoundEffectVolumeChange = (
+    _: Event,
+    newValue: number | number[]
+  ) => {
+    setSoundEffectVolume(newValue as number);
+  };
 
   const { category } = location.state as { category: string };
 
-  const handleGuess = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      const guess = (event.target as HTMLInputElement).value.trim().toLowerCase();
-      if (guess === "") return;
+  const shuffleArray = <T,>(arr: T[]) => {
+    const newArray = [...arr]; // Create a copy of the array
 
-      const answerList = topTenListsRef.current[topTenListIndex || 0]?.answerList
-      .map(answer => answer.toLowerCase());
-      const answerLoc = answerList.indexOf(guess);
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // Swap elements
+    }
 
-      if (answerLoc !== -1) {
-        if (guessedAnswers[answerLoc]) return;
+    return newArray;
+  };
 
-        const newAnswers = [...guessedAnswers];
-        newAnswers[answerLoc] = true;
-        setGuessedAnswers(newAnswers);
+  const handleAnswerClicked = (i: number) => {
+    setCurrentAnswers((prevCurrentAnswers) => {
+      if (currentAnswers[i].guessState === "correct" || numLives === 0)
+        return prevCurrentAnswers;
 
-        setCorrectResponses(correctResponses + 1);
-        setStreak(streak + 1);
-
-        if (!newAnswers.includes(false) && topTenListIndex !== undefined) {
-          if (boardsCleared >= constants.LISTS_PER_ROUND - 1)
-            navigate("/finish", {
-              state: {
-                correctResponses: correctResponses + 1,
-                boardsCleared: boardsCleared + 1,
-                category,
-              },
-            });
-
-          setBoardsCleared(boardsCleared + 1);
-          setTopTenListIndex(topTenListIndex + 1);
-          setGuessedAnswers(Array.from(Array(constants.LIST_LENGTH), () => false));
-          setNumLives(constants.NUM_LIVES);
+      const updatedAnswers = prevCurrentAnswers.map((answer, index) => {
+        if (index === i) {
+          return { ...answer, selected: !currentAnswers[i].selected };
         }
+        return answer;
+      });
+
+      const numSelectedUpdated = updatedAnswers.filter(
+        (answer) => answer.selected
+      ).length;
+
+      if (numSelectedUpdated > 2) return prevCurrentAnswers;
+
+      if (numSelectedUpdated === 2) setSwapEnabled(true);
+      else setSwapEnabled(false);
+
+      return updatedAnswers;
+    });
+  };
+
+  const handleSwapClicked = () => {
+    // Play swap button sound
+    playSound(swapSound);
+    const selectedAnswersIndices = currentAnswers
+      .map((answer, i) => (answer.selected ? i : -1))
+      .filter((index) => index !== -1);
+
+    const updatedAnswers = [...currentAnswers];
+
+    updatedAnswers[selectedAnswersIndices[0]].readySwap = false;
+    updatedAnswers[selectedAnswersIndices[1]].readySwap = false;
+    // Update state to trigger zoom out
+    setCurrentAnswers(updatedAnswers);
+
+    setTimeout(() => {
+      updatedAnswers[selectedAnswersIndices[0]].readySwap = true;
+      updatedAnswers[selectedAnswersIndices[1]].readySwap = true;
+      updatedAnswers[selectedAnswersIndices[0]].selected = false;
+      updatedAnswers[selectedAnswersIndices[0]].guessState = "default";
+      updatedAnswers[selectedAnswersIndices[1]].selected = false;
+      updatedAnswers[selectedAnswersIndices[1]].guessState = "default";
+
+      const temp = updatedAnswers[selectedAnswersIndices[0]];
+      updatedAnswers[selectedAnswersIndices[0]] =
+        updatedAnswers[selectedAnswersIndices[1]];
+      updatedAnswers[selectedAnswersIndices[1]] = temp;
+
+      setCurrentAnswers(updatedAnswers);
+      setSwapEnabled(false);
+    }, 500);
+  };
+
+  const handleSubmitClicked = () => {
+    // Play menu button sound
+    playSound(menuButtonSound);
+    const correctAnswers =
+      topTenListsRef.current[topTenListIndex || 0].answerList;
+    const updatedAnswers = currentAnswers.map((answer, i) => {
+      if (answer.answer === correctAnswers[i]) {
+        return { ...answer, guessState: "correct", selected: false };
       } else {
-        if (numLives <= 1)
-          navigate("/finish", {
-            state: { correctResponses, boardsCleared, category },
-          });
-
-        setStreak(0);
-        setNumLives(numLives - 1);
+        return { ...answer, guessState: "wrong", selected: false };
       }
+    });
 
-      (event.target as HTMLInputElement).value = "";
+    const numCorrect = updatedAnswers.filter(
+      (answer) => answer.guessState === "correct"
+    ).length;
+
+    if (numCorrect === constants.LIST_LENGTH) {
+      setContinueEnabled(true);
+      setSubmitEnabled(false);
+    } else {
+      setNumLives((prevNumLives) => {
+        const updatedNumLives = prevNumLives - 1;
+
+        if (updatedNumLives === 0) {
+          setContinueEnabled(true);
+          setSubmitEnabled(false);
+        }
+
+        return updatedNumLives;
+      });
+    }
+
+    setCurrentAnswers(updatedAnswers);
+  };
+
+  const handleContinueClicked = () => {
+    const numCorrect = currentAnswers.filter(
+      (answer) => answer.guessState === "correct"
+    ).length;
+    // Play menu button sound
+    playSound(menuButtonSound);
+    if (topTenListIndex === constants.LISTS_PER_ROUND - 1)
+      navigate("/finish", {
+        state: {
+          category: category,
+          numAnswersCorrect: numAnswersCorrect + numCorrect,
+        },
+      });
+    else {
+      setNumAnswersCorrect(numAnswersCorrect + numCorrect);
+      setCurrentAnswers(
+        shuffleArray(
+          topTenListsRef.current[topTenListIndex || 0 + 1].answerList
+        ).map((answer) => ({
+          answer: answer,
+          guessState: "default",
+          selected: false,
+          readySwap: true,
+        }))
+      );
+      setContinueEnabled(false);
+      setNumLives(constants.NUM_LIVES);
+      setTopTenListIndex((topTenListIndex || 0) + 1);
+      setSubmitEnabled(true);
     }
   };
 
   useEffect(() => {
-    topTenListsRef.current = topTenLists.filter(
-      (list) => list.category === category
+    console.log("loading data");
+    console.log(category);
+    topTenListsRef.current = shuffleArray(
+      topTenLists.filter((list) => list.category === category)
     );
+
     setTopTenListIndex(0);
-  }, []);
+
+    if (topTenListsRef.current.length > 0)
+      setCurrentAnswers(
+        shuffleArray(topTenListsRef.current[0].answerList).map((answer) => ({
+          answer: answer,
+          guessState: "default",
+          selected: false,
+          readySwap: true,
+        }))
+      );
+  }, [category]);
 
   return (
     <Box
@@ -111,7 +294,7 @@ const Category: React.FC = () => {
           borderRadius: "8px",
           padding: "1em",
           marginTop: "2em",
-          marginBottom: "2em",
+          marginBottom: "1em",
         }}
       >
         <Typography variant="h6" sx={{ color: "black", textAlign: "center" }}>
@@ -119,18 +302,179 @@ const Category: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* User input */}
-      <TextField
-        variant="filled"
-        label="Your Guess"
-        onKeyUp={handleGuess}
+      <Box display="flex" justifyContent="center" marginBottom="1.5em">
+        {/* Quit button */}
+        <Button
+          startIcon={<ExitToApp />}
+          variant="contained"
+          color="warning"
+          sx={{
+            fontSize: "1em",
+            fontFamily: "Arial,Helvetica,sans-serif",
+            fontWeight: "bold",
+            marginLeft: "1em",
+          }}
+          onClick={handleQuitClick}
+        >
+          Quit
+        </Button>
+      </Box>
+      <Box display="flex" justifyContent="center" marginBottom="1.5em">
+        {/* Settings button */}
+        <Button
+          startIcon={<Settings />}
+          variant="contained"
+          color="warning"
+          sx={{
+            fontSize: "1em",
+            fontFamily: "Arial,Helvetica,sans-serif",
+            fontWeight: "bold",
+            // width: "175px",
+          }}
+          onClick={handleSettingsOpen}
+        >
+          Settings
+        </Button>
+        {/* Tutorial/Help button */}
+        <Button
+          startIcon={<HelpOutline />}
+          variant="contained"
+          color="warning"
+          sx={{
+            fontSize: "1em",
+            fontFamily: "Arial,Helvetica,sans-serif",
+            fontWeight: "bold",
+            marginLeft: "1em",
+          }}
+          onClick={() => {
+            playSound(menuButtonSound);
+            // TODO: Add tutorial navigation or action here
+          }}
+        >
+          Help
+        </Button>
+      </Box>
+
+      {/* Settings Dialog */}
+      <Dialog
+        open={settingsOpen}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleSettingsClose}
+        aria-labelledby="settings-dialog-title"
+      >
+        <DialogTitle id="settings-dialog-title">Volume</DialogTitle>
+        <DialogContent>
+          <Box
+            sx={{
+              width: {
+                xs: 200, // Mobile devices
+                sm: 300, // Tablets
+                md: 300, // Small laptops/desktops
+                lg: 300, // Larger desktops
+              },
+            }}
+          >
+            {/* Music Volume */}
+            <Typography gutterBottom>Music</Typography>
+            <Stack
+              spacing={2}
+              direction="row"
+              sx={{ alignItems: "center", mb: 2 }}
+            >
+              <VolumeOff />
+              <Slider
+                aria-label="Music Volume"
+                value={musicVolume}
+                onChange={handleMusicVolumeChange}
+                sx={{ width: "100%", maxWidth: "300px" }}
+              />
+              <VolumeUp />
+            </Stack>
+
+            {/* Sound Effect Volume */}
+            <Typography gutterBottom>Sound Effect</Typography>
+            <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
+              <VolumeOff />
+              <Slider
+                aria-label="Sound Effect Volume"
+                value={soundEffectVolume}
+                onChange={handleSoundEffectVolumeChange}
+                sx={{ width: "100%", maxWidth: "300px" }}
+              />
+              <VolumeUp />
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSettingsClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Exit dialog */}
+      <Dialog
+        open={exitDialogOpen}
+        TransitionComponent={Transition}
+        onClose={handleExitCancel}
+        aria-labelledby="exit-dialog-title"
+      >
+        <DialogTitle id="exit-dialog-title">Exit Game</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to exit Tendle?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleExitCancel} color="primary">
+            NO
+          </Button>
+          <Button onClick={handleExitConfirm} color="primary">
+            YES
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Buttons to check answers and continue to next round */}
+      <Box
         sx={{
-          marginBottom: "20px",
-          backgroundColor: "white",
-          borderRadius: "4px",
-          minWidth: "300px",
+          display: "flex",
+          gap: 2,
+          marginBottom: 2,
         }}
-      />
+      >
+        <Button
+          sx={{
+            backgroundColor: "#de6143",
+            color: "white",
+            fontSize: "1em",
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: "#c55030",
+            },
+          }}
+          variant="contained"
+          startIcon={<CheckCircleOutline />}
+          disabled={!submitEnabled}
+          onClick={handleSubmitClicked}
+        >
+          Submit Answers
+        </Button>
+        <Button
+          sx={{
+            backgroundColor: "#de6143",
+            fontSize: "1em",
+            textTransform: "none",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "#c55030",
+            },
+          }}
+          variant="contained"
+          endIcon={<NavigateNext />}
+          disabled={!continueEnabled}
+          onClick={handleContinueClicked}
+        >
+          Continue
+        </Button>
+      </Box>
 
       <Box
         display="flex"
@@ -142,9 +486,6 @@ const Category: React.FC = () => {
           maxWidth: "500px",
         }}
       >
-        <Typography variant="h6" mr={3}>
-          Streak: {streak}
-        </Typography>
         <Box
           display="flex"
           alignItems="center"
@@ -156,10 +497,43 @@ const Category: React.FC = () => {
           <Typography variant="h6" mr={1}>
             Lives:
           </Typography>
-          {[...Array(numLives)].map((_, index) => (
-            <img key={index} src={heart} alt="Heart" style={{ width: "2em" }} />
+          {[...Array(constants.NUM_LIVES)].map((_, index) => (
+            <Fade in={index < numLives} timeout={500} key={index} unmountOnExit>
+              <img
+                src={heart}
+                alt="Heart"
+                style={{ width: "2em", marginRight: "0.5em" }}
+              />
+            </Fade>
           ))}
         </Box>
+      </Box>
+
+      {/* Swap Button */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "1em",
+        }}
+      >
+        <Button
+          startIcon={<SwapHoriz />}
+          variant="contained"
+          sx={{
+            backgroundColor: "#de6143",
+            color: "white",
+            fontSize: "1em",
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: "#c55030",
+            },
+          }}
+          disabled={!swapEnabled}
+          onClick={handleSwapClicked}
+        >
+          Swap
+        </Button>
       </Box>
 
       {/* Grid of 10 answers, see https://mui.com/material-ui/react-grid2/ */}
@@ -175,42 +549,64 @@ const Category: React.FC = () => {
             gridTemplateColumns: "repeat(2, 1fr)", // 2 equal columns
           }}
         >
-          {Array.from(Array(constants.LIST_LENGTH)).map((_, index) => (
-            <Grid key={index}>
-              <Item
-                sx={{
-                  fontSize: "1.5em",
-                  color: "black",
-                  textAlign: "left",
-                  minWidth: "100px",
-                }}
-              >
-                {index + 1}&#46;
-                {guessedAnswers[index] && 
-                " " + topTenListsRef.current[topTenListIndex || 0]?.answerList[index]}
-              </Item>
-            </Grid>
-          ))}
+          {currentAnswers.map((answer, i) => {
+            return (
+              <Grid key={i}>
+                <Zoom
+                  in={answer.readySwap}
+                  timeout={1000}
+                  // style={{ transitionDelay: `${i * 100}ms` }}
+                >
+                  <Item
+                    onClick={() => handleAnswerClicked(i)}
+                    sx={{
+                      fontSize: "1em",
+                      backgroundColor: answer.selected
+                        ? "#f6d365"
+                        : answer.guessState === "default"
+                        ? "white"
+                        : answer.guessState === "wrong"
+                        ? "error.main"
+                        : "success.main",
+                      color:
+                        answer.guessState === "default" || answer.selected
+                          ? "black"
+                          : "white",
+                      textAlign: "left",
+                      minWidth: "100px",
+                      maxWidth: "300px",
+                      wordWrap: "break-word",
+                      cursor:
+                        answer.guessState !== "correct" ? "pointer" : "default",
+                      "&:hover":
+                        answer.guessState !== "correct"
+                          ? {
+                              boxShadow:
+                                answer.guessState === "default" ||
+                                answer.selected
+                                  ? "0 0 5px black"
+                                  : "0 0 5px white",
+                              border:
+                                answer.guessState === "default" ||
+                                answer.selected
+                                  ? "1px solid black"
+                                  : "1px solid white",
+                            }
+                          : {},
+                    }}
+                  >
+                    {i + 1}. {answer.answer}
+                  </Item>
+                </Zoom>
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
 
       <Box display="flex" justifyContent="center">
         <img src={logo} alt="Logo" style={{ width: "150px" }} />
       </Box>
-
-      {/* <Button
-        variant="contained"
-        sx={{
-          backgroundColor: "#FB8500",
-          fontSize: "1.25em",
-          fontFamily: "Arial,Helvetica,sans-serif",
-          fontWeight: "bold",
-          marginBottom: 4,
-        }}
-        onClick={handleCheckAnswer}
-      >
-        Check
-      </Button> */}
     </Box>
   );
 };
