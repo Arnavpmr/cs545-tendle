@@ -23,6 +23,8 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import SettingsIcon from "@mui/icons-material/Settings";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 
 import { MusicContext } from "../sound/MusicContext";
 import { SoundEffectsContext } from "../sound/SoundEffectsContext";
@@ -81,6 +83,20 @@ const Category: React.FC = () => {
   const [continueEnabled, setContinueEnabled] = useState(false);
   const [submitEnabled, setSubmitEnabled] = useState(true);
   const [numAnswersCorrect, setNumAnswersCorrect] = useState(0);
+
+  const [exitDialogOpen, setExitDialogOpen] = useState(false);
+  const handleQuitClick = () => {
+    playSound(menuButtonSound);
+    setExitDialogOpen(true);
+  };
+
+  const handleExitConfirm = () => {
+    navigate("/", { replace: true });
+  };
+
+  const handleExitCancel = () => {
+    setExitDialogOpen(false);
+  };
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { soundEffectVolume, setSoundEffectVolume, playSound } =
@@ -193,8 +209,7 @@ const Category: React.FC = () => {
     if (numCorrect === constants.LIST_LENGTH) {
       setContinueEnabled(true);
       setSubmitEnabled(false);
-    }
-    else {
+    } else {
       setNumLives((prevNumLives) => {
         const updatedNumLives = prevNumLives - 1;
 
@@ -276,7 +291,7 @@ const Category: React.FC = () => {
           borderRadius: "8px",
           padding: "1em",
           marginTop: "2em",
-          marginBottom: "2em",
+          marginBottom: "1em",
         }}
       >
         <Typography variant="h6" sx={{ color: "black", textAlign: "center" }}>
@@ -284,8 +299,25 @@ const Category: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* Settings button */}
       <Box display="flex" justifyContent="center" marginBottom="1.5em">
+        {/* Quit button */}
+        <Button
+          startIcon={<ExitToAppIcon />}
+          variant="contained"
+          color="warning"
+          sx={{
+            fontSize: "1em",
+            fontFamily: "Arial,Helvetica,sans-serif",
+            fontWeight: "bold",
+            marginLeft: "1em",
+          }}
+          onClick={handleQuitClick}
+        >
+          Quit
+        </Button>
+      </Box>
+      <Box display="flex" justifyContent="center" marginBottom="1.5em">
+        {/* Settings button */}
         <Button
           startIcon={<SettingsIcon />}
           variant="contained"
@@ -294,13 +326,32 @@ const Category: React.FC = () => {
             fontSize: "1em",
             fontFamily: "Arial,Helvetica,sans-serif",
             fontWeight: "bold",
-            width: "175px",
+            // width: "175px",
           }}
           onClick={handleSettingsOpen}
         >
           Settings
         </Button>
+        {/* Tutorial/Help button */}
+        <Button
+          startIcon={<HelpOutlineIcon />}
+          variant="contained"
+          color="warning"
+          sx={{
+            fontSize: "1em",
+            fontFamily: "Arial,Helvetica,sans-serif",
+            fontWeight: "bold",
+            marginLeft: "1em",
+          }}
+          onClick={() => {
+            playSound(menuButtonSound);
+            // TODO: Add tutorial navigation or action here
+          }}
+        >
+          Help
+        </Button>
       </Box>
+
       {/* Settings Dialog */}
       <Dialog
         open={settingsOpen}
@@ -311,7 +362,16 @@ const Category: React.FC = () => {
       >
         <DialogTitle id="settings-dialog-title">Volume</DialogTitle>
         <DialogContent>
-          <Box sx={{ width: 300 }}>
+          <Box
+            sx={{
+              width: {
+                xs: 200, // Mobile devices
+                sm: 300, // Tablets
+                md: 300, // Small laptops/desktops
+                lg: 300, // Larger desktops
+              },
+            }}
+          >
             {/* Music Volume */}
             <Typography gutterBottom>Music</Typography>
             <Stack
@@ -324,6 +384,7 @@ const Category: React.FC = () => {
                 aria-label="Music Volume"
                 value={musicVolume}
                 onChange={handleMusicVolumeChange}
+                sx={{ width: "100%", maxWidth: "300px" }}
               />
               <VolumeUp />
             </Stack>
@@ -336,6 +397,7 @@ const Category: React.FC = () => {
                 aria-label="Sound Effect Volume"
                 value={soundEffectVolume}
                 onChange={handleSoundEffectVolumeChange}
+                sx={{ width: "100%", maxWidth: "300px" }}
               />
               <VolumeUp />
             </Stack>
@@ -343,6 +405,27 @@ const Category: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleSettingsClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Exit dialog */}
+      <Dialog
+        open={exitDialogOpen}
+        TransitionComponent={Transition}
+        onClose={handleExitCancel}
+        aria-labelledby="exit-dialog-title"
+      >
+        <DialogTitle id="exit-dialog-title">Exit Game</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to exit Tendle?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleExitCancel} color="primary">
+            NO
+          </Button>
+          <Button onClick={handleExitConfirm} color="primary">
+            YES
+          </Button>
         </DialogActions>
       </Dialog>
 

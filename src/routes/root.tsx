@@ -222,7 +222,16 @@ const Root: React.FC = () => {
           >
             <DialogTitle id="settings-dialog-title">Volume</DialogTitle>
             <DialogContent>
-              <Box sx={{ width: 300 }}>
+              <Box
+                sx={{
+                  width: {
+                    xs: 200, // Mobile devices
+                    sm: 300, // Tablets
+                    md: 300, // Small laptops/desktops
+                    lg: 300, // Larger desktops
+                  },
+                }}
+              >
                 {/* Music Volume */}
                 <Typography gutterBottom>Music</Typography>
                 <Stack
@@ -235,6 +244,7 @@ const Root: React.FC = () => {
                     aria-label="Music Volume"
                     value={musicVolume}
                     onChange={handleMusicVolumeChange}
+                    sx={{ width: "100%", maxWidth: "300px" }}
                   />
                   <VolumeUp />
                 </Stack>
@@ -251,6 +261,7 @@ const Root: React.FC = () => {
                     aria-label="Sound Effect Volume"
                     value={soundEffectVolume}
                     onChange={handleSoundEffectVolumeChange}
+                    sx={{ width: "100%", maxWidth: "300px" }}
                   />
                   <VolumeUp />
                 </Stack>
