@@ -26,7 +26,7 @@ import menuButtonSound from "../sound/audio/menuButton.mp3";
 import swapSound from "../sound/audio/swap.mp3";
 import * as constants from "../constants";
 import {
-  VolumeOff,
+  VolumeDown,
   VolumeUp,
   CheckCircleOutline,
   NavigateNext,
@@ -382,7 +382,7 @@ const Category: React.FC = () => {
               direction="row"
               sx={{ alignItems: "center", mb: 2 }}
             >
-              <VolumeOff />
+              <VolumeDown />
               <Slider
                 aria-label="Music Volume"
                 value={musicVolume}
@@ -395,7 +395,7 @@ const Category: React.FC = () => {
             {/* Sound Effect Volume */}
             <Typography gutterBottom>Sound Effect</Typography>
             <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
-              <VolumeOff />
+              <VolumeDown />
               <Slider
                 aria-label="Sound Effect Volume"
                 value={soundEffectVolume}
