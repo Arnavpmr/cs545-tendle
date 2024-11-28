@@ -22,7 +22,7 @@ import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import Slider from "@mui/material/Slider";
 import {
-  VolumeOff,
+  VolumeDown,
   VolumeUp,
   PlayArrow,
   HelpOutline,
@@ -240,7 +240,7 @@ const Root: React.FC = () => {
                   direction="row"
                   sx={{ alignItems: "center", mb: 2 }}
                 >
-                  <VolumeOff />
+                  <VolumeDown />
                   <Slider
                     aria-label="Music Volume"
                     value={musicVolume}
@@ -257,7 +257,7 @@ const Root: React.FC = () => {
                   direction="row"
                   sx={{ alignItems: "center" }}
                 >
-                  <VolumeOff />
+                  <VolumeDown />
                   <Slider
                     aria-label="Sound Effect Volume"
                     value={soundEffectVolume}
