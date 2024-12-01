@@ -503,6 +503,8 @@ const Category: React.FC = () => {
           sx={{
             display: "grid",
             gridTemplateColumns: "repeat(2, 1fr)", // 2 equal columns
+            gridTemplateRows: "repeat(5, auto)", // 5 rows
+            gridAutoFlow: "column", // Arrange items vertically
           }}
         >
           {currentAnswers.map((answer, i) => {
