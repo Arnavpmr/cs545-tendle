@@ -10,27 +10,17 @@ import {
   SelectChangeEvent,
   FormControl,
   InputLabel,
-  Stack,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import logo from "../assets/logo.png";
 import * as constants from "../constants";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
-import Slider from "@mui/material/Slider";
-import {
-  VolumeDown,
-  VolumeUp,
-  PlayArrow,
-  HelpOutline,
-  Settings,
-} from "@mui/icons-material";
+import { PlayArrow, HelpOutline, Settings } from "@mui/icons-material";
 import { MusicContext } from "../sound/MusicContext";
 import { SoundEffectsContext } from "../sound/SoundEffectsContext";
-import Tutorial from "../components/Tutorial";
+
+// Components
+import TutorialDialog from "../components/TutorialDialog";
+import SettingsDialog from "../components/SettingsDialog";
+import MusicConsentDialog from "../components/MusicConsentDialog";
 
 // Import sound effects
 import menuButtonSound from "../sound/audio/menuButton.mp3";
@@ -38,21 +28,12 @@ import gameStartSound from "../sound/audio/gameStart.mp3";
 
 import { CATEGORIES } from "../constants";
 
-// Transition component for the dialog
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & { children: React.ReactElement },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
-
 const Root: React.FC = () => {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { musicVolume, setMusicVolume, hasConsented, setHasConsented } =
+  const { setMusicVolume, hasConsented, setHasConsented } =
     useContext(MusicContext);
-  const { soundEffectVolume, setSoundEffectVolume, playSound } =
-    useContext(SoundEffectsContext);
+  const { playSound } = useContext(SoundEffectsContext);
   const navigate = useNavigate();
 
   const handleCategoryChange = (event: SelectChangeEvent) => {
@@ -65,15 +46,6 @@ const Root: React.FC = () => {
   };
   const handleSettingsClose = () => {
     setSettingsOpen(false);
-  };
-  const handleMusicVolumeChange = (_: Event, newValue: number | number[]) => {
-    setMusicVolume(newValue as number);
-  };
-  const handleSoundEffectVolumeChange = (
-    _: Event,
-    newValue: number | number[]
-  ) => {
-    setSoundEffectVolume(newValue as number);
   };
 
   const handleMusicConsent = (consent: boolean) => {
@@ -200,90 +172,14 @@ const Root: React.FC = () => {
             Settings
           </Button>
 
-          {/* Tutorial Dialog */}
-          <Tutorial open={tutorialOpen} onClose={handleTutorialClose} />
-
-          {/* Music Consent Dialog */}
-          <Dialog
+          {/* Tutorial, Settings, Music Consent Dialog */}
+          <TutorialDialog open={tutorialOpen} onClose={handleTutorialClose} />
+          <SettingsDialog open={settingsOpen} onClose={handleSettingsClose} />
+          <MusicConsentDialog
             open={!hasConsented}
-            TransitionComponent={Transition}
-            keepMounted
-            onClose={() => handleMusicConsent(false)}
-            aria-labelledby="music-consent-dialog-title"
-          >
-            <DialogTitle id="music-consent-dialog-title">
-              Play Background Music
-            </DialogTitle>
-            <DialogContent>
-              <Typography>
-                Would you like to enable background music?
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => handleMusicConsent(true)}>Yes</Button>
-              <Button onClick={() => handleMusicConsent(false)}>No</Button>
-            </DialogActions>
-          </Dialog>
-
-          {/* Settings Dialog */}
-          <Dialog
-            open={settingsOpen}
-            TransitionComponent={Transition}
-            keepMounted
-            onClose={handleSettingsClose}
-            aria-labelledby="settings-dialog-title"
-          >
-            <DialogTitle id="settings-dialog-title">Volume</DialogTitle>
-            <DialogContent>
-              <Box
-                sx={{
-                  width: {
-                    xs: 200, // Mobile devices
-                    sm: 300, // Tablets
-                    md: 300, // Small laptops/desktops
-                    lg: 300, // Larger desktops
-                  },
-                }}
-              >
-                {/* Music Volume */}
-                <Typography gutterBottom>Music</Typography>
-                <Stack
-                  spacing={2}
-                  direction="row"
-                  sx={{ alignItems: "center", mb: 2 }}
-                >
-                  <VolumeDown />
-                  <Slider
-                    aria-label="Music Volume"
-                    value={musicVolume}
-                    onChange={handleMusicVolumeChange}
-                    sx={{ width: "100%", maxWidth: "300px" }}
-                  />
-                  <VolumeUp />
-                </Stack>
-
-                {/* Sound Effect Volume */}
-                <Typography gutterBottom>Sound Effect</Typography>
-                <Stack
-                  spacing={2}
-                  direction="row"
-                  sx={{ alignItems: "center" }}
-                >
-                  <VolumeDown />
-                  <Slider
-                    aria-label="Sound Effect Volume"
-                    value={soundEffectVolume}
-                    onChange={handleSoundEffectVolumeChange}
-                    sx={{ width: "100%", maxWidth: "300px" }}
-                  />
-                  <VolumeUp />
-                </Stack>
-              </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleSettingsClose}>Close</Button>
-            </DialogActions>
-          </Dialog>
+            onConfirm={() => handleMusicConsent(true)}
+            onCancel={() => handleMusicConsent(false)}
+          />
 
           {/* Attribution Text */}
           <Box

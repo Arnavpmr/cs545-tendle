@@ -41,6 +41,7 @@ const Tutorial: React.FC<TutorialProps> = ({ open, onClose }) => {
       open={open}
       onClose={onClose}
       TransitionComponent={Transition}
+      keepMounted
       maxWidth="md"
     >
       <IconButton

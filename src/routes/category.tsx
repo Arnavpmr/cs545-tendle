@@ -1,34 +1,22 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import topTenLists from "../data/topTenLists";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Fade,
-  Paper,
-  Slider,
-  Stack,
-  Typography,
-  Zoom,
-} from "@mui/material";
+import { Box, Button, Fade, Paper, Typography, Zoom } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import logo from "../assets/logo.png";
 import heart from "../assets/heart.png";
 import { styled } from "@mui/material/styles";
 
-import Tutorial from "../components/Tutorial";
-import { MusicContext } from "../sound/MusicContext";
+// Components
+import TutorialDialog from "../components/TutorialDialog";
+import SettingsDialog from "../components/SettingsDialog";
+import QuitDialog from "../components/QuitDialog";
+
 import { SoundEffectsContext } from "../sound/SoundEffectsContext";
 import menuButtonSound from "../sound/audio/menuButton.mp3";
 import swapSound from "../sound/audio/swap.mp3";
 import * as constants from "../constants";
 import {
-  VolumeDown,
-  VolumeUp,
   CheckCircleOutline,
   NavigateNext,
   SwapHoriz,
@@ -36,7 +24,6 @@ import {
   HelpOutline,
   ExitToApp,
 } from "@mui/icons-material";
-import Transition from "../components/Transition";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -79,39 +66,30 @@ const Category: React.FC = () => {
   const [submitEnabled, setSubmitEnabled] = useState(true);
   const [numAnswersCorrect, setNumAnswersCorrect] = useState(0);
 
-  const [exitDialogOpen, setExitDialogOpen] = useState(false);
+  // Quit Dialog
+  const [quitDialogOpen, setQuitDialogOpen] = useState(false);
   const handleQuitClick = () => {
     playSound(menuButtonSound);
-    setExitDialogOpen(true);
+    setQuitDialogOpen(true);
   };
 
-  const handleExitConfirm = () => {
+  const handleQuitConfirm = () => {
     navigate("/", { replace: true });
   };
 
-  const handleExitCancel = () => {
-    setExitDialogOpen(false);
+  const handleQuitCancel = () => {
+    setQuitDialogOpen(false);
   };
 
+  // Settings Dialog
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { soundEffectVolume, setSoundEffectVolume, playSound } =
-    useContext(SoundEffectsContext);
-  const { musicVolume, setMusicVolume } = useContext(MusicContext);
+  const { playSound } = useContext(SoundEffectsContext);
   const handleSettingsOpen = () => {
     playSound(menuButtonSound);
     setSettingsOpen(true);
   };
   const handleSettingsClose = () => {
     setSettingsOpen(false);
-  };
-  const handleMusicVolumeChange = (_: Event, newValue: number | number[]) => {
-    setMusicVolume(newValue as number);
-  };
-  const handleSoundEffectVolumeChange = (
-    _: Event,
-    newValue: number | number[]
-  ) => {
-    setSoundEffectVolume(newValue as number);
   };
 
   // Tutorial Dialog
@@ -355,85 +333,14 @@ const Category: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Tutorial Dialog */}
-      <Tutorial open={tutorialOpen} onClose={handleTutorialClose} />
-
-      {/* Settings Dialog */}
-      <Dialog
-        open={settingsOpen}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleSettingsClose}
-        aria-labelledby="settings-dialog-title"
-      >
-        <DialogTitle id="settings-dialog-title">Volume</DialogTitle>
-        <DialogContent>
-          <Box
-            sx={{
-              width: {
-                xs: 200, // Mobile devices
-                sm: 300, // Tablets
-                md: 300, // Small laptops/desktops
-                lg: 300, // Larger desktops
-              },
-            }}
-          >
-            {/* Music Volume */}
-            <Typography gutterBottom>Music</Typography>
-            <Stack
-              spacing={2}
-              direction="row"
-              sx={{ alignItems: "center", mb: 2 }}
-            >
-              <VolumeDown />
-              <Slider
-                aria-label="Music Volume"
-                value={musicVolume}
-                onChange={handleMusicVolumeChange}
-                sx={{ width: "100%", maxWidth: "300px" }}
-              />
-              <VolumeUp />
-            </Stack>
-
-            {/* Sound Effect Volume */}
-            <Typography gutterBottom>Sound Effect</Typography>
-            <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
-              <VolumeDown />
-              <Slider
-                aria-label="Sound Effect Volume"
-                value={soundEffectVolume}
-                onChange={handleSoundEffectVolumeChange}
-                sx={{ width: "100%", maxWidth: "300px" }}
-              />
-              <VolumeUp />
-            </Stack>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleSettingsClose}>Close</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Exit dialog */}
-      <Dialog
-        open={exitDialogOpen}
-        TransitionComponent={Transition}
-        onClose={handleExitCancel}
-        aria-labelledby="exit-dialog-title"
-      >
-        <DialogTitle id="exit-dialog-title">Exit Game</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to exit Tendle?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleExitCancel} color="primary">
-            NO
-          </Button>
-          <Button onClick={handleExitConfirm} color="primary">
-            YES
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Tutorial, Settings, Quit Dialog */}
+      <TutorialDialog open={tutorialOpen} onClose={handleTutorialClose} />
+      <SettingsDialog open={settingsOpen} onClose={handleSettingsClose} />
+      <QuitDialog
+        open={quitDialogOpen}
+        onConfirm={handleQuitConfirm}
+        onCancel={handleQuitCancel}
+      />
 
       {/* Buttons to check answers and continue to next round */}
       <Box
