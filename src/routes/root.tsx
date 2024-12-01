@@ -126,7 +126,6 @@ const Root: React.FC = () => {
             color="warning"
             sx={{
               fontSize: "1.25em",
-              fontFamily: "Arial,Helvetica,sans-serif",
               fontWeight: "bold",
               width: "175px",
             }}
@@ -145,7 +144,6 @@ const Root: React.FC = () => {
             color="warning"
             sx={{
               fontSize: "1.25em",
-              fontFamily: "Arial,Helvetica,sans-serif",
               fontWeight: "bold",
               width: "175px",
               marginTop: "1em",
@@ -162,7 +160,6 @@ const Root: React.FC = () => {
             color="warning"
             sx={{
               fontSize: "1.25em",
-              fontFamily: "Arial,Helvetica,sans-serif",
               fontWeight: "bold",
               width: "175px",
             }}

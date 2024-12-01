@@ -319,9 +319,9 @@ const Category: React.FC = () => {
           color="warning"
           sx={{
             fontSize: "1em",
-            fontFamily: "Arial,Helvetica,sans-serif",
             fontWeight: "bold",
             marginLeft: "1em",
+            textTransform: "none",
           }}
           onClick={handleQuitClick}
         >
@@ -336,8 +336,8 @@ const Category: React.FC = () => {
           color="warning"
           sx={{
             fontSize: "1em",
-            fontFamily: "Arial,Helvetica,sans-serif",
             fontWeight: "bold",
+            textTransform: "none",
             // width: "175px",
           }}
           onClick={handleSettingsOpen}
@@ -351,9 +351,9 @@ const Category: React.FC = () => {
           color="warning"
           sx={{
             fontSize: "1em",
-            fontFamily: "Arial,Helvetica,sans-serif",
             fontWeight: "bold",
             marginLeft: "1em",
+            textTransform: "none",
           }}
           onClick={handleTutorialOpen}
         >
@@ -553,7 +553,7 @@ const Category: React.FC = () => {
                           : {},
                     }}
                   >
-                    {i + 1}. {answer.answer}
+                    {`${i + 1})`} {answer.answer}
                   </Item>
                 </Zoom>
               </Grid>

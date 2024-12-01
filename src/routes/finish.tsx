@@ -45,7 +45,6 @@ const Finish: React.FC = () => {
           color="warning"
           sx={{
             fontSize: "1.25em",
-            fontFamily: "Arial,Helvetica,sans-serif",
             fontWeight: "bold",
             textTransform: "none",
             marginBottom: 4,
@@ -59,7 +58,6 @@ const Finish: React.FC = () => {
           color="warning"
           sx={{
             fontSize: "1.25em",
-            fontFamily: "Arial,Helvetica,sans-serif",
             fontWeight: "bold",
             textTransform: "none",
           }}
