@@ -30,6 +30,7 @@ import {
 } from "@mui/icons-material";
 import { MusicContext } from "../sound/MusicContext";
 import { SoundEffectsContext } from "../sound/SoundEffectsContext";
+import Tutorial from "../components/Tutorial";
 
 // Import sound effects
 import menuButtonSound from "../sound/audio/menuButton.mp3";
@@ -82,6 +83,17 @@ const Root: React.FC = () => {
       setMusicVolume(0);
     }
     setHasConsented(true);
+  };
+
+  // Tutorial Dialog
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const handleTutorialOpen = () => {
+    playSound(menuButtonSound);
+    setTutorialOpen(true);
+  };
+
+  const handleTutorialClose = () => {
+    setTutorialOpen(false);
   };
 
   return (
@@ -166,10 +178,7 @@ const Root: React.FC = () => {
               width: "175px",
               marginTop: "1em",
             }}
-            onClick={() => {
-              playSound(menuButtonSound);
-              // TODO: Add tutorial navigation or action here
-            }}
+            onClick={handleTutorialOpen}
           >
             Tutorial
           </Button>
@@ -190,6 +199,9 @@ const Root: React.FC = () => {
           >
             Settings
           </Button>
+
+          {/* Tutorial Dialog */}
+          <Tutorial open={tutorialOpen} onClose={handleTutorialClose} />
 
           {/* Music Consent Dialog */}
           <Dialog

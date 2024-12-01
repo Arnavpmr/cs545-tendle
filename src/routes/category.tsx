@@ -20,6 +20,7 @@ import logo from "../assets/logo.png";
 import heart from "../assets/heart.png";
 import { styled } from "@mui/material/styles";
 
+import Tutorial from "../components/Tutorial";
 import { MusicContext } from "../sound/MusicContext";
 import { SoundEffectsContext } from "../sound/SoundEffectsContext";
 import menuButtonSound from "../sound/audio/menuButton.mp3";
@@ -35,16 +36,7 @@ import {
   HelpOutline,
   ExitToApp,
 } from "@mui/icons-material";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
-
-// Transition component for the dialog
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & { children: React.ReactElement },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import Transition from "../components/Transition";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -120,6 +112,17 @@ const Category: React.FC = () => {
     newValue: number | number[]
   ) => {
     setSoundEffectVolume(newValue as number);
+  };
+
+  // Tutorial Dialog
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const handleTutorialOpen = () => {
+    playSound(menuButtonSound);
+    setTutorialOpen(true);
+  };
+
+  const handleTutorialClose = () => {
+    setTutorialOpen(false);
   };
 
   const { category } = location.state as { category: string };
@@ -346,14 +349,14 @@ const Category: React.FC = () => {
             fontWeight: "bold",
             marginLeft: "1em",
           }}
-          onClick={() => {
-            playSound(menuButtonSound);
-            // TODO: Add tutorial navigation or action here
-          }}
+          onClick={handleTutorialOpen}
         >
           Help
         </Button>
       </Box>
+
+      {/* Tutorial Dialog */}
+      <Tutorial open={tutorialOpen} onClose={handleTutorialClose} />
 
       {/* Settings Dialog */}
       <Dialog
