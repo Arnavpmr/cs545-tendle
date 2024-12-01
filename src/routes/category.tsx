@@ -23,6 +23,7 @@ import {
   Settings,
   HelpOutline,
   ExitToApp,
+  Visibility,
 } from "@mui/icons-material";
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -62,6 +63,7 @@ const Category: React.FC = () => {
   const [numLives, setNumLives] = useState(constants.NUM_LIVES);
 
   const [swapEnabled, setSwapEnabled] = useState(false);
+  const [revealAnswersEnabled, setRevealAnswersEnabled] = useState(false);
   const [continueEnabled, setContinueEnabled] = useState(false);
   const [submitEnabled, setSubmitEnabled] = useState(true);
   const [numAnswersCorrect, setNumAnswersCorrect] = useState(0);
@@ -200,6 +202,7 @@ const Category: React.FC = () => {
         if (updatedNumLives === 0) {
           setContinueEnabled(true);
           setSubmitEnabled(false);
+          setRevealAnswersEnabled(true);
         }
 
         return updatedNumLives;
@@ -239,6 +242,31 @@ const Category: React.FC = () => {
       setTopTenListIndex((topTenListIndex || 0) + 1);
       setSubmitEnabled(true);
     }
+  };
+
+  const handleRevealAnswersClicked = () => {
+    // Play menu button sound
+    playSound(menuButtonSound);
+    // Retrieve the current top ten list based on the index
+    const correctAnswers =
+      topTenListsRef.current[topTenListIndex || 0].answerList;
+    // Update currentAnswers:
+    // - Keep 'correct' answers as is
+    // - Replace others with correct answers and set guessState to 'revealed'
+    setCurrentAnswers(
+      currentAnswers.map((answer, index) =>
+        answer.guessState === "correct"
+          ? answer
+          : {
+              answer: correctAnswers[index],
+              guessState: "revealed",
+              selected: false,
+              readySwap: true,
+            }
+      )
+    );
+    // Disable the reveal answers button
+    setRevealAnswersEnabled(false);
   };
 
   useEffect(() => {
@@ -419,12 +447,13 @@ const Category: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Swap Button */}
+      {/* Swap, Reveal Answers Button */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "center",
           marginBottom: "1em",
+          gap: 2,
         }}
       >
         <Button
@@ -443,6 +472,23 @@ const Category: React.FC = () => {
           onClick={handleSwapClicked}
         >
           Swap
+        </Button>
+        <Button
+          startIcon={<Visibility />}
+          variant="contained"
+          sx={{
+            backgroundColor: "#de6143",
+            color: "white",
+            fontSize: "1em",
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: "#c55030",
+            },
+          }}
+          disabled={!revealAnswersEnabled}
+          onClick={handleRevealAnswersClicked}
+        >
+          Reveal Answers
         </Button>
       </Box>
 
