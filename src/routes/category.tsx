@@ -495,7 +495,7 @@ const Category: React.FC = () => {
       {/* Grid of 10 answers, see https://mui.com/material-ui/react-grid2/ */}
       {/* Note: could not get MUI grid formatted properly with regular props.
           so used regular CSS */}
-      <Box marginBottom={5}>
+      <Box marginTop={2} marginBottom={5}>
         <Grid
           container
           spacing={2}

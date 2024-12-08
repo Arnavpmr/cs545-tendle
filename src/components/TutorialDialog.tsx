@@ -1,19 +1,37 @@
 import React, { useState } from "react";
-import { Dialog, DialogContent, IconButton, Box } from "@mui/material";
+import {
+  Dialog,
+  DialogContent,
+  IconButton,
+  Box,
+  DialogTitle,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import Transition from "./Transition";
 // Import tutorial images
-import dummy1 from "../assets/dummy1.jpg";
-import dummy2 from "../assets/dummy2.jpg";
-import dummy3 from "../assets/dummy3.jpg";
-
-const tutorialImages = [
-  dummy1,
-  dummy2,
-  dummy3,
-  // Add more imported images
+const tutorialImages = import.meta.glob("../assets/tutorial/*.jpg", {
+  eager: true,
+});
+const tutorialCaptions = [
+  "Click 'Play' to start.",
+  "Select a question category from the dropdown.",
+  "Go to the Settings page.",
+  "This is the Game page. Rank the items in the correct order from greatest to least.",
+  "Press 'Quit' to return to the main menu.",
+  "Swap items: Select the first one.",
+  "Swap items: Select the second one.",
+  "Swap items: Confirm the swap.",
+  "Click 'Submit Answers' to check your list.",
+  "Results: Incorrect spots are red, correct spots are green.",
+  "You have 3 lives to play.",
+  "Swap items until you run out of lives.",
+  "When ready, click 'Continue' to proceed.",
+  "Click 'Reveal Answers' to see the solution.",
+  "Final Score is shown on the End Screen.",
+  "This is the End Screen Page. To play again, click 'Play Again.'",
+  "This is the End Screen Page. To change categories, click 'Change Category.'",
 ];
 
 interface TutorialProps {
@@ -26,13 +44,13 @@ const Tutorial: React.FC<TutorialProps> = ({ open, onClose }) => {
 
   const handlePrev = () => {
     setCurrentImage((prev) =>
-      prev === 0 ? tutorialImages.length - 1 : prev - 1
+      prev === 0 ? Object.keys(tutorialImages).length - 1 : prev - 1
     );
   };
 
   const handleNext = () => {
     setCurrentImage((prev) =>
-      prev === tutorialImages.length - 1 ? 0 : prev + 1
+      prev === Object.keys(tutorialImages).length - 1 ? 0 : prev + 1
     );
   };
 
@@ -42,7 +60,7 @@ const Tutorial: React.FC<TutorialProps> = ({ open, onClose }) => {
       onClose={onClose}
       TransitionComponent={Transition}
       keepMounted
-      maxWidth="md"
+      fullScreen
     >
       <IconButton
         aria-label="close"
@@ -54,21 +72,57 @@ const Tutorial: React.FC<TutorialProps> = ({ open, onClose }) => {
           color: "black",
         })}
       >
-        <CloseIcon />
+        <CloseIcon sx={{ fontSize: 50 }} />
       </IconButton>
+
+      {/* Arrow navigation */}
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        paddingTop={10}
+      >
+        <IconButton
+          aria-label="move to previous tutorial image"
+          onClick={handlePrev}
+          sx={{ marginRight: 1, color: "black" }}
+        >
+          <ArrowCircleLeftIcon sx={{ fontSize: 50 }} />
+        </IconButton>
+        <IconButton
+          aria-label="move to next tutorial image"
+          onClick={handleNext}
+          sx={{ marginLeft: 1, color: "black" }}
+        >
+          <ArrowCircleRightIcon sx={{ fontSize: 50 }} />
+        </IconButton>
+      </Box>
+
+      {/* Dialog Title Below Arrows */}
+      <Box>
+        <DialogTitle textAlign="center" sx={{ textAlign: "center" }}>
+          {tutorialCaptions[currentImage]}
+        </DialogTitle>
+      </Box>
       <DialogContent>
         <Box display="flex" alignItems="center" justifyContent="center">
-          <IconButton onClick={handlePrev}>
-            <ArrowBackIosIcon />
-          </IconButton>
           <img
-            src={tutorialImages[currentImage]}
+            src={
+              (
+                tutorialImages[
+                  `../assets/tutorial/tutorial${currentImage + 1}.jpg`
+                ] as { default: string }
+              ).default
+            }
             alt={`Tutorial Image ${currentImage + 1}`}
-            style={{ maxWidth: "80%", maxHeight: "60vh" }}
+            style={{
+              width: "100%",
+              height: "auto",
+              maxWidth: "600px", // Fixed max width
+              maxHeight: "600px", // Fixed max height
+              objectFit: "contain", // Maintain aspect ratio
+            }}
           />
-          <IconButton onClick={handleNext}>
-            <ArrowForwardIosIcon />
-          </IconButton>
         </Box>
       </DialogContent>
     </Dialog>
