@@ -1,50 +1,30 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import topTenLists from "../data/topTenLists";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Fade,
-  Paper,
-  Slider,
-  Stack,
-  Typography,
-  Zoom,
-} from "@mui/material";
+import { Box, Button, Fade, Paper, Typography, Zoom } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import logo from "../assets/logo.png";
 import heart from "../assets/heart.png";
 import { styled } from "@mui/material/styles";
 
-import { MusicContext } from "../sound/MusicContext";
+// Components
+import TutorialDialog from "../components/TutorialDialog";
+import SettingsDialog from "../components/SettingsDialog";
+import QuitDialog from "../components/QuitDialog";
+
 import { SoundEffectsContext } from "../sound/SoundEffectsContext";
 import menuButtonSound from "../sound/audio/menuButton.mp3";
 import swapSound from "../sound/audio/swap.mp3";
 import * as constants from "../constants";
 import {
-  VolumeDown,
-  VolumeUp,
   CheckCircleOutline,
   NavigateNext,
   SwapHoriz,
   Settings,
   HelpOutline,
   ExitToApp,
+  Visibility,
 } from "@mui/icons-material";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
-
-// Transition component for the dialog
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & { children: React.ReactElement },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -83,28 +63,29 @@ const Category: React.FC = () => {
   const [numLives, setNumLives] = useState(constants.NUM_LIVES);
 
   const [swapEnabled, setSwapEnabled] = useState(false);
+  const [revealAnswersEnabled, setRevealAnswersEnabled] = useState(false);
   const [continueEnabled, setContinueEnabled] = useState(false);
   const [submitEnabled, setSubmitEnabled] = useState(true);
   const [numAnswersCorrect, setNumAnswersCorrect] = useState(0);
 
-  const [exitDialogOpen, setExitDialogOpen] = useState(false);
+  // Quit Dialog
+  const [quitDialogOpen, setQuitDialogOpen] = useState(false);
   const handleQuitClick = () => {
     playSound(menuButtonSound);
-    setExitDialogOpen(true);
+    setQuitDialogOpen(true);
   };
 
-  const handleExitConfirm = () => {
+  const handleQuitConfirm = () => {
     navigate("/", { replace: true });
   };
 
-  const handleExitCancel = () => {
-    setExitDialogOpen(false);
+  const handleQuitCancel = () => {
+    setQuitDialogOpen(false);
   };
 
+  // Settings Dialog
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { soundEffectVolume, setSoundEffectVolume, playSound } =
-    useContext(SoundEffectsContext);
-  const { musicVolume, setMusicVolume } = useContext(MusicContext);
+  const { playSound } = useContext(SoundEffectsContext);
   const handleSettingsOpen = () => {
     playSound(menuButtonSound);
     setSettingsOpen(true);
@@ -112,14 +93,16 @@ const Category: React.FC = () => {
   const handleSettingsClose = () => {
     setSettingsOpen(false);
   };
-  const handleMusicVolumeChange = (_: Event, newValue: number | number[]) => {
-    setMusicVolume(newValue as number);
+
+  // Tutorial Dialog
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const handleTutorialOpen = () => {
+    playSound(menuButtonSound);
+    setTutorialOpen(true);
   };
-  const handleSoundEffectVolumeChange = (
-    _: Event,
-    newValue: number | number[]
-  ) => {
-    setSoundEffectVolume(newValue as number);
+
+  const handleTutorialClose = () => {
+    setTutorialOpen(false);
   };
 
   const { category } = location.state as { category: string };
@@ -219,6 +202,7 @@ const Category: React.FC = () => {
         if (updatedNumLives === 0) {
           setContinueEnabled(true);
           setSubmitEnabled(false);
+          setRevealAnswersEnabled(true);
         }
 
         return updatedNumLives;
@@ -258,6 +242,31 @@ const Category: React.FC = () => {
       setTopTenListIndex((topTenListIndex || 0) + 1);
       setSubmitEnabled(true);
     }
+  };
+
+  const handleRevealAnswersClicked = () => {
+    // Play menu button sound
+    playSound(menuButtonSound);
+    // Retrieve the current top ten list based on the index
+    const correctAnswers =
+      topTenListsRef.current[topTenListIndex || 0].answerList;
+    // Update currentAnswers:
+    // - Keep 'correct' answers as is
+    // - Replace others with correct answers and set guessState to 'revealed'
+    setCurrentAnswers(
+      currentAnswers.map((answer, index) =>
+        answer.guessState === "correct"
+          ? answer
+          : {
+              answer: correctAnswers[index],
+              guessState: "revealed",
+              selected: false,
+              readySwap: true,
+            }
+      )
+    );
+    // Disable the reveal answers button
+    setRevealAnswersEnabled(false);
   };
 
   useEffect(() => {
@@ -310,9 +319,9 @@ const Category: React.FC = () => {
           color="warning"
           sx={{
             fontSize: "1em",
-            fontFamily: "Arial,Helvetica,sans-serif",
             fontWeight: "bold",
             marginLeft: "1em",
+            textTransform: "none",
           }}
           onClick={handleQuitClick}
         >
@@ -327,8 +336,8 @@ const Category: React.FC = () => {
           color="warning"
           sx={{
             fontSize: "1em",
-            fontFamily: "Arial,Helvetica,sans-serif",
             fontWeight: "bold",
+            textTransform: "none",
             // width: "175px",
           }}
           onClick={handleSettingsOpen}
@@ -342,95 +351,24 @@ const Category: React.FC = () => {
           color="warning"
           sx={{
             fontSize: "1em",
-            fontFamily: "Arial,Helvetica,sans-serif",
             fontWeight: "bold",
             marginLeft: "1em",
+            textTransform: "none",
           }}
-          onClick={() => {
-            playSound(menuButtonSound);
-            // TODO: Add tutorial navigation or action here
-          }}
+          onClick={handleTutorialOpen}
         >
           Help
         </Button>
       </Box>
 
-      {/* Settings Dialog */}
-      <Dialog
-        open={settingsOpen}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleSettingsClose}
-        aria-labelledby="settings-dialog-title"
-      >
-        <DialogTitle id="settings-dialog-title">Volume</DialogTitle>
-        <DialogContent>
-          <Box
-            sx={{
-              width: {
-                xs: 200, // Mobile devices
-                sm: 300, // Tablets
-                md: 300, // Small laptops/desktops
-                lg: 300, // Larger desktops
-              },
-            }}
-          >
-            {/* Music Volume */}
-            <Typography gutterBottom>Music</Typography>
-            <Stack
-              spacing={2}
-              direction="row"
-              sx={{ alignItems: "center", mb: 2 }}
-            >
-              <VolumeDown />
-              <Slider
-                aria-label="Music Volume"
-                value={musicVolume}
-                onChange={handleMusicVolumeChange}
-                sx={{ width: "100%", maxWidth: "300px" }}
-              />
-              <VolumeUp />
-            </Stack>
-
-            {/* Sound Effect Volume */}
-            <Typography gutterBottom>Sound Effect</Typography>
-            <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
-              <VolumeDown />
-              <Slider
-                aria-label="Sound Effect Volume"
-                value={soundEffectVolume}
-                onChange={handleSoundEffectVolumeChange}
-                sx={{ width: "100%", maxWidth: "300px" }}
-              />
-              <VolumeUp />
-            </Stack>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleSettingsClose}>Close</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Exit dialog */}
-      <Dialog
-        open={exitDialogOpen}
-        TransitionComponent={Transition}
-        onClose={handleExitCancel}
-        aria-labelledby="exit-dialog-title"
-      >
-        <DialogTitle id="exit-dialog-title">Exit Game</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to exit Tendle?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleExitCancel} color="primary">
-            NO
-          </Button>
-          <Button onClick={handleExitConfirm} color="primary">
-            YES
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Tutorial, Settings, Quit Dialog */}
+      <TutorialDialog open={tutorialOpen} onClose={handleTutorialClose} />
+      <SettingsDialog open={settingsOpen} onClose={handleSettingsClose} />
+      <QuitDialog
+        open={quitDialogOpen}
+        onConfirm={handleQuitConfirm}
+        onCancel={handleQuitCancel}
+      />
 
       {/* Buttons to check answers and continue to next round */}
       <Box
@@ -509,12 +447,13 @@ const Category: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Swap Button */}
+      {/* Swap, Reveal Answers Button */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "center",
           marginBottom: "1em",
+          gap: 2,
         }}
       >
         <Button
@@ -534,12 +473,29 @@ const Category: React.FC = () => {
         >
           Swap
         </Button>
+        <Button
+          startIcon={<Visibility />}
+          variant="contained"
+          sx={{
+            backgroundColor: "#de6143",
+            color: "white",
+            fontSize: "1em",
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: "#c55030",
+            },
+          }}
+          disabled={!revealAnswersEnabled}
+          onClick={handleRevealAnswersClicked}
+        >
+          Reveal Answers
+        </Button>
       </Box>
 
       {/* Grid of 10 answers, see https://mui.com/material-ui/react-grid2/ */}
       {/* Note: could not get MUI grid formatted properly with regular props.
           so used regular CSS */}
-      <Box marginBottom={5}>
+      <Box marginTop={2} marginBottom={5}>
         <Grid
           container
           spacing={2}
@@ -547,6 +503,8 @@ const Category: React.FC = () => {
           sx={{
             display: "grid",
             gridTemplateColumns: "repeat(2, 1fr)", // 2 equal columns
+            gridTemplateRows: "repeat(5, auto)", // 5 rows
+            gridAutoFlow: "column", // Arrange items vertically
           }}
         >
           {currentAnswers.map((answer, i) => {
@@ -595,7 +553,7 @@ const Category: React.FC = () => {
                           : {},
                     }}
                   >
-                    {i + 1}. {answer.answer}
+                    {`${i + 1})`} {answer.answer}
                   </Item>
                 </Zoom>
               </Grid>
