@@ -517,6 +517,8 @@ const Category: React.FC = () => {
                 >
                   <Item
                     onClick={() => handleAnswerClicked(i)}
+                    tabIndex={0}
+                    onKeyDown={(key) => (key.key === "Enter") ? handleAnswerClicked(i) : 0}
                     sx={{
                       fontSize: "1em",
                       backgroundColor: answer.selected
@@ -563,7 +565,7 @@ const Category: React.FC = () => {
       </Box>
 
       <Box display="flex" justifyContent="center">
-        <img src={logo} alt="Logo" style={{ width: "150px" }} />
+        <img src={logo} alt="TENDLE Logo" style={{ width: "150px" }} />
       </Box>
     </Box>
   );

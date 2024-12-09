@@ -71,7 +71,7 @@ const Root: React.FC = () => {
   return (
     <Box
       sx={{
-        backgroundColor: "#219EBC",
+        backgroundColor: "#277f95",
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
@@ -88,7 +88,7 @@ const Root: React.FC = () => {
         >
           <img
             src={logo}
-            alt="Logo"
+            alt="Tendle: Top 10 Trivia"
             style={{ width: "250px", marginBottom: "20px" }}
           />
           <Typography variant="h4" gutterBottom>
